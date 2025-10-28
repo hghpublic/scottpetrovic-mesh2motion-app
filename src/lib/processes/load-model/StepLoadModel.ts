@@ -6,10 +6,9 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 import { Scene } from 'three/src/scenes/Scene.js'
 import { Mesh } from 'three/src/objects/Mesh.js'
-import { MeshNormalMaterial } from 'three/src/materials/MeshNormalMaterial.js'
 import { MathUtils } from 'three/src/math/MathUtils.js'
 import { FrontSide } from 'three/src/constants.js'
-import { type BufferGeometry, type Material, type Object3D, type SkinnedMesh } from 'three'
+import { MeshPhongMaterial, type BufferGeometry, type Material, type Object3D, type SkinnedMesh } from 'three'
 import { ModalDialog } from '../../ModalDialog.ts'
 
 // Note: EventTarget is a built-ininterface and do not need to import it
@@ -70,7 +69,8 @@ export class StepLoadModel extends EventTarget {
 
         // material is broken somehow, so just use a normal material to help communicate this
         if (this.mesh_has_broken_material) {
-          const new_material: Material = new MeshNormalMaterial()
+          const new_material: MeshPhongMaterial = new MeshPhongMaterial()
+          new_material.color.set(0x00aaee)
           this.material_list.push(new_material)
           return
         }
@@ -186,10 +186,11 @@ export class StepLoadModel extends EventTarget {
       console.log('loaded the FBX file', results)
       this.mesh_has_broken_material = results.is_missing_dependencies
       const loaded_scene: Scene = new Scene()
-      this.process_loaded_scene(loaded_scene)
 
       // TODO: add the processed, cleaned up data instead of the fbx_scene directly
       loaded_scene.add(results.fbx_scene)
+
+      this.process_loaded_scene(loaded_scene)
     }).catch((error) => {
       console.warn('some type of error', error)
     })
@@ -290,10 +291,11 @@ export class StepLoadModel extends EventTarget {
 
       // potentially use normal material to help debugging models that look odd
       // some materials have some odd transparency or back-face things that make it look odd
-      let material_to_use: MeshNormalMaterial
+      let material_to_use: MeshPhongMaterial
       if (this.debug_model_loading && new_mesh !== undefined) {
-        material_to_use = new MeshNormalMaterial()
+        material_to_use = new MeshPhongMaterial()
         material_to_use.side = FrontSide
+        material_to_use.color.set(0x00aaee)
         new_mesh.material = material_to_use
       }
     })
