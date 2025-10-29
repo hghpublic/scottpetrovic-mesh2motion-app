@@ -2,7 +2,7 @@ import { UI } from '../../UI.ts'
 import { Generators } from '../../Generators.ts'
 import { Utility } from '../../Utilities.ts'
 import { UndoRedoSystem } from './UndoRedoSystem.ts'
-import * as PreviewPlaneManager from './PreviewPlaneManager.ts'
+import { PreviewPlaneManager } from './PreviewPlaneManager.ts'
 import {
   Vector3,
   Euler,
@@ -52,6 +52,7 @@ export class StepEditSkeleton extends EventTarget {
   private readonly joint_texture = new TextureLoader().load('images/skeleton-joint-point.png')
 
   private _added_event_listeners: boolean = false
+  private readonly preview_plane_manager: PreviewPlaneManager = PreviewPlaneManager.getInstance()
 
   constructor () {
     super()
@@ -98,6 +99,8 @@ export class StepEditSkeleton extends EventTarget {
   public setup_scene (main_scene: Scene): void {
     // add the skeleton to the scene
     this._main_scene_ref = main_scene
+    // Initialize the preview plane manager with the scene
+    this.preview_plane_manager.initialize(main_scene)
   }
 
   public begin (): void {
@@ -185,16 +188,7 @@ export class StepEditSkeleton extends EventTarget {
    */
   public set_preview_plane_visible (visible: boolean): void {
     this.preview_plane_visible = visible
-    
-    if (this._main_scene_ref === null) {
-      return
-    }
-
-    if (visible) {
-      PreviewPlaneManager.add_preview_plane(this._main_scene_ref, this.preview_plane_height)
-    } else {
-      PreviewPlaneManager.remove_preview_plane(this._main_scene_ref)
-    }
+    this.preview_plane_manager.set_visibility(visible)
   }
 
   /**
@@ -210,10 +204,7 @@ export class StepEditSkeleton extends EventTarget {
    */
   public set_preview_plane_height (height: number): void {
     this.preview_plane_height = height
-    
-    if (this._main_scene_ref !== null && this.preview_plane_visible) {
-      PreviewPlaneManager.update_preview_plane_height(this._main_scene_ref, height)
-    }
+    this.preview_plane_manager.update_height(height)
   }
 
   /**
@@ -373,10 +364,8 @@ export class StepEditSkeleton extends EventTarget {
    * Remove the preview plane from the scene
    */
   private remove_preview_plane (): void {
-    if (this._main_scene_ref !== null) {
-      PreviewPlaneManager.remove_preview_plane(this._main_scene_ref)
-      this.preview_plane_visible = false
-    }
+    this.preview_plane_manager.cleanup()
+    this.preview_plane_visible = false
   }
 
   /*
