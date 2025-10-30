@@ -1,7 +1,4 @@
 import { UI } from '../../UI.ts'
-
-import BoneWeightsByDistance from '../../solvers/BoneWeightsByDistance.ts'
-import BoneWeightsByDistanceChild from '../../solvers/BoneWeightsByDistanceChild.ts'
 import SolverDistanceChildTargeting from '../../solvers/SolverDistanceChildTargeting.ts'
 
 import { SkinningFormula } from '../../enums/SkinningFormula.ts'
@@ -47,15 +44,6 @@ export class StepWeightSkin extends EventTarget {
   public create_bone_formula_object (editable_armature: Object3D, skinning_formula: string, skeleton_type: SkeletonType): AbstractAutoSkinSolver | null {
     this.skinning_armature = editable_armature.clone()
     this.skinning_armature.name = 'Armature for skinning'
-
-    // Swap out formulas to see different results
-    if (skinning_formula === SkinningFormula.Distance) {
-      this.bone_skinning_formula = new BoneWeightsByDistance(this.skinning_armature.children[0], skeleton_type)
-    }
-
-    if (skinning_formula === SkinningFormula.DistanceChild) {
-      this.bone_skinning_formula = new BoneWeightsByDistanceChild(this.skinning_armature.children[0], skeleton_type)
-    }
 
     if (skinning_formula === SkinningFormula.DistanceChildTargeting) {
       this.bone_skinning_formula = new SolverDistanceChildTargeting(this.skinning_armature.children[0], skeleton_type)

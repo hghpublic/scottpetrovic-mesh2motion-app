@@ -1,5 +1,4 @@
+// we have simplified skinning formulas to just one option for now
 export enum SkinningFormula {
-  Distance = 'distance',
-  DistanceChild = 'distance-child',
-  DistanceChildTargeting = 'distance-child-targeting',
+  DistanceChildTargeting = 'distance-child-targeting'
 }
