@@ -99,13 +99,14 @@ export class Mesh2MotionEngine {
     tippy('[data-tippy-content]', { theme: 'mesh2motion' })
   }
 
-  // for the release, let's just show the first 7 characters of the commit SHA
+  // for the release, let's just show the first N characters of the commit SHA
   // then the branch we used to build. This comes from Cloudflare build process
   private inject_build_version (): void {
     if (this.ui.dom_build_version !== null) {
-      this.ui.dom_build_version.innerHTML = `${window.CLOUDFLARE_COMMIT_SHA.slice(0, 6)}-(${window.CLOUDFLARE_BRANCH})`
-    } else {
-      console.warn('Build version DOM element is null. Cannot set number')
+      const commit_sha: string = window.CLOUDFLARE_COMMIT_SHA.slice(0, 9)
+      const branch: string = window.CLOUDFLARE_BRANCH
+
+      this.ui.dom_build_version.innerHTML = `${commit_sha}-${branch}`
     }
   }
 
