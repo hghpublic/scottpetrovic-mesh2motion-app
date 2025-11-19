@@ -41,14 +41,13 @@ There is separate tool in the web app where you can generate video previews for 
 
 [Preview Generator Documentation](src/preview-generator/README.md)
 
-## Contributor Guide
-I am not an animator, so you will notice a lot of animations aren't very good. It is a good assumption that if the animation sucks, it is probably made by me. Feel free to help me and create better/new ones.
+## Blender 3D Source files
+Many of the 3d files are originally created using Blender. This includes 3d models, rigs, and animations. To prevent this repository from becoming too large with big animation files, these source files are separated into a different repository. The final compressed GLB files are saved to this repository. These source files aren't needed to buil and run the application, so you can ignore this unless you want to contribute more animations. This repository is located here: https://github.com/Mesh2Motion/mesh2motion-assets
 
 ## Licenses
 
 The code and platform are all licensed under the very permissive MIT license. The art assets (3d models, rigs, animations) are all licensed under CC0. I tried making everything as open as possible to remix, change, and build upon for the future.
 
-[Contributor Guide](CONTRIBUTOR.md)
 
 ## ❤️ Help the Project Grow
 I don't expect to be receiving money for working on this, but I am also not the best animator. If people want to see better, and more, animations made, add to the fund. I can pay for an animator to help build out the animation library better. Or, if you know an animator that wants to help with this, send them my way! I am just a dude working on this during nights and weekends.
