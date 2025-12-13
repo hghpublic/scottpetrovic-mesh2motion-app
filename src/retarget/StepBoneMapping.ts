@@ -13,6 +13,8 @@ export class StepBoneMapping extends EventTarget {
   private target_bones_list: HTMLDivElement | null = null
   private clear_mappings_button: HTMLButtonElement | null = null
   private auto_map_button: HTMLButtonElement | null = null
+  private source_bone_count: HTMLSpanElement | null = null
+  private target_bone_count: HTMLSpanElement | null = null
 
   // Bone mapping: target bone name -> source bone name
   private bone_mapping: Map<string, string> = new Map()
@@ -31,6 +33,10 @@ export class StepBoneMapping extends EventTarget {
     this.target_bones_list = document.getElementById('target-bones-list') as HTMLDivElement
     this.clear_mappings_button = document.getElementById('clear-mappings-button') as HTMLButtonElement
     this.auto_map_button = document.getElementById('auto-map-button') as HTMLButtonElement
+
+    // for display only on the bones list for reference
+    this.source_bone_count = document.getElementById('source-bone-count') as HTMLSpanElement
+    this.target_bone_count = document.getElementById('target-bone-count') as HTMLSpanElement
 
     // Add event listener for clear mappings button
     this.clear_mappings_button?.addEventListener('click', () => {
@@ -136,6 +142,12 @@ export class StepBoneMapping extends EventTarget {
     if (this.source_bones_list === null) return
 
     const bone_names = this.get_source_bone_names()
+    
+    // Update bone count display
+    if (this.source_bone_count !== null) {
+      this.source_bone_count.textContent = `(${bone_names.length})`
+    }
+    
     if (bone_names.length === 0) {
       this.source_bones_list.innerHTML = '<em>No source skeleton loaded</em>'
       return
@@ -163,6 +175,12 @@ export class StepBoneMapping extends EventTarget {
     if (this.target_bones_list === null) return
 
     const bone_names = this.get_target_bone_names()
+    
+    // Update bone count display
+    if (this.target_bone_count !== null) {
+      this.target_bone_count.textContent = `(${bone_names.length})`
+    }
+    
     if (bone_names.length === 0) {
       this.target_bones_list.innerHTML = '<em>No target skeleton loaded</em>'
       return
