@@ -1,4 +1,4 @@
-import { Bone } from 'three'
+import { Bone, Group, Object3D, SkinnedMesh } from 'three'
 import { BoneCategoryMapper } from './BoneCategoryMapper'
 
 /**
@@ -32,6 +32,7 @@ export interface BoneMetadata {
   normalized_name: string // Normalized version for matching
   side: BoneSide // Which side of the body
   category: BoneCategory // Anatomical category
+  parent_name: string | null // Name of parent bone, null if root
 }
 
 /**
@@ -43,20 +44,26 @@ export interface BoneMetadata {
 export class BoneAutoMapper {
   /**
    * Attempts to automatically map source bones (Mesh2Motion) to target bones (uploaded mesh)
-   * @param source_bone_names - Array of bone names from the Mesh2Motion skeleton (source)
-   * @param target_bone_names - Array of bone names from the uploaded mesh skeleton (target)
+   * @param source_armature - Source skeleton armature (Mesh2Motion skeleton)
+   * @param target_skeleton_data - Target skeleton data (uploaded mesh)
    * @returns Map of target bone name -> source bone name
    */
-  public static auto_map_bones (source_bone_names: string[], target_bone_names: string[]): Map<string, string> {
+  public static auto_map_bones (
+    source_armature: Object3D,
+    target_skeleton_data: Group
+  ): Map<string, string> {
     // mappings: final output mapping of target bone name to source bone name
     let mappings = new Map<string, string>()
 
+    // Extract bone data from both skeletons
+    // this also contains the parent bone relationship
+    // which will help us later when doing auto-mapping calculations
+    const source_parent_map: Map<string, string | null> = this.extract_source_bone_parent_map(source_armature)
+    const target_parent_map: Map<string, string | null> = this.extract_target_bone_parent_map(target_skeleton_data)
+
     // Create metadata for both source and target bones
-    // console.log('=== SOURCE BONES ===')
-    const source_bones_meta: BoneMetadata[] = this.create_all_bone_metadata(source_bone_names)
-    
-    // console.log('\n=== TARGET BONES ===')
-    const target_bones_meta: BoneMetadata[] = this.create_all_bone_metadata(target_bone_names)
+    const source_bones_meta: BoneMetadata[] = this.create_all_bone_metadata(source_parent_map)
+    const target_bones_meta: BoneMetadata[] = this.create_all_bone_metadata(target_parent_map)
 
     console.log('\n=== FINAL BONE METADATA ===')
     console.log('Source bones metadata:', source_bones_meta)
@@ -119,15 +126,70 @@ export class BoneAutoMapper {
   }
 
   /**
-   * Create metadata for an array of bone names
-   * @param bone_names - Array of bone names to process
+   * Extract bone parent relationships from source skeleton (Mesh2Motion armature)
+   * @param source_armature - Source skeleton armature
+   * @returns Map of bone name to parent bone name
+   */
+  private static extract_source_bone_parent_map (source_armature: Object3D): Map<string, string | null> {
+    const parent_map = new Map<string, string | null>()
+
+    source_armature.traverse((child) => {
+      if (child.type === 'Bone') {
+        const parent_bone = child.parent
+        if (parent_bone !== null && parent_bone.type === 'Bone') {
+          parent_map.set(child.name, parent_bone.name)
+        } else {
+          parent_map.set(child.name, null) // Root bone
+        }
+      }
+    })
+
+    return parent_map
+  }
+
+  /**
+   * Extract bone parent relationships from target skeleton (uploaded mesh)
+   * @param target_skeleton_data - Target skeleton data group
+   * @returns Map of bone name to parent bone name
+   */
+  private static extract_target_bone_parent_map (target_skeleton_data: Group): Map<string, string | null> {
+    const parent_map = new Map<string, string | null>()
+    const processed_bones = new Set<string>()
+
+    target_skeleton_data.traverse((child) => {
+      if (child.type === 'SkinnedMesh') {
+        const skinned_mesh = child as SkinnedMesh
+        const skeleton = skinned_mesh.skeleton
+        skeleton.bones.forEach((bone) => {
+          // Skip if we've already processed this bone
+          if (processed_bones.has(bone.name)) {
+            return
+          }
+          processed_bones.add(bone.name)
+
+          const parent_bone = bone.parent
+          if (parent_bone !== null && parent_bone.type === 'Bone') {
+            parent_map.set(bone.name, parent_bone.name)
+          } else {
+            parent_map.set(bone.name, null) // Root bone
+          }
+        })
+      }
+    })
+
+    return parent_map
+  }
+
+  /**
+   * Create metadata for all bones from parent map
+   * @param parent_map - Map of bone name to parent bone name (null for root bones)
    * @returns Array of bone metadata objects
    */
-  private static create_all_bone_metadata (bone_names: string[]): BoneMetadata[] {
+  private static create_all_bone_metadata (parent_map: Map<string, string | null>): BoneMetadata[] {
     const bones_metadata: BoneMetadata[] = []
 
-    for (const bone_name of bone_names) {
-      const metadata = this.create_bone_metadata(bone_name)
+    for (const [bone_name, parent_name] of parent_map) {
+      const metadata = this.create_bone_metadata(bone_name, parent_name)
       bones_metadata.push(metadata)
     }
 
@@ -185,14 +247,16 @@ export class BoneAutoMapper {
   /**
    * Create metadata for a bone including category, side, and normalized name
    * @param bone_name - Original bone name
+   * @param parent_name - Name of the parent bone (null if root)
    * @returns BoneMetadata object
    */
-  private static create_bone_metadata (bone_name: string): BoneMetadata {
+  private static create_bone_metadata (bone_name: string, parent_name: string | null): BoneMetadata {
     const bone_metadata: BoneMetadata = {
       name: bone_name,
       normalized_name: 'Unknown',
       side: BoneSide.Unknown,
-      category: BoneCategory.Unknown
+      category: BoneCategory.Unknown,
+      parent_name: parent_name
     }
 
     bone_metadata.category = this.categorize_bone(bone_name)

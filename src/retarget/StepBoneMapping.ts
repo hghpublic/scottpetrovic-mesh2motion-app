@@ -339,11 +339,11 @@ export class StepBoneMapping extends EventTarget {
       return
     }
 
-    const source_bone_names = this.get_source_bone_names()
-    const target_bone_names = this.get_target_bone_names()
-
     // Use BoneAutoMapper to generate mappings
-    const auto_mappings = BoneAutoMapper.auto_map_bones(source_bone_names, target_bone_names)
+    const auto_mappings = BoneAutoMapper.auto_map_bones(
+      this.source_armature!,
+      this.target_skeleton_data!
+    )
 
     // Apply the auto-generated mappings
     this.bone_mapping = auto_mappings
