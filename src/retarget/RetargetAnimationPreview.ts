@@ -1,6 +1,7 @@
-import { AnimationClip, AnimationMixer, type Scene, type SkinnedMesh, VectorKeyframeTrack, QuaternionKeyframeTrack, AnimationAction } from 'three'
+import { AnimationClip, AnimationMixer, type Scene, type SkinnedMesh, VectorKeyframeTrack, QuaternionKeyframeTrack, type AnimationAction } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { SkeletonType } from '../lib/enums/SkeletonType.ts'
+import { AnimationUtility } from '../lib/processes/animations-listing/AnimationUtility.ts'
 import type { StepBoneMapping } from './StepBoneMapping.ts'
 
 /**
@@ -115,6 +116,10 @@ export class RetargetAnimationPreview extends EventTarget {
               this.current_animation_clip = gltf.animations[0]
               if (this.current_animation_clip !== null) {
                 console.log('Loaded animation:', this.current_animation_clip.name)
+
+                // Clean up the animation track data before using it
+                // This removes unnecessary position tracks and keeps only rotation data
+                AnimationUtility.clean_track_data([this.current_animation_clip])
               }
               this.update_preview_animation()
               resolve()

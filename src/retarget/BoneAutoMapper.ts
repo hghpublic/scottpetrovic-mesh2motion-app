@@ -1,6 +1,7 @@
 import { Bone, Group, Object3D, SkinnedMesh } from 'three'
 import { BoneCategoryMapper } from './BoneCategoryMapper'
 import { MixamoMapper } from './MixamoMapper'
+import { TargetBoneMappingType } from './StepBoneMapping'
 
 /**
  * Bone categories for grouping bones by anatomical area
@@ -51,7 +52,8 @@ export class BoneAutoMapper {
    */
   public static auto_map_bones (
     source_armature: Object3D,
-    target_skeleton_data: Group
+    target_skeleton_data: Group,
+    target_bone_mapping_type: TargetBoneMappingType
   ): Map<string, string> {
     // mappings: final output mapping of target bone name to source bone name
     let mappings = new Map<string, string>()
@@ -72,8 +74,7 @@ export class BoneAutoMapper {
 
     // if the target is a mixamo rig and our skeleton type is human, we can do a direct name mapping
     // without worrying about guessing
-    const is_target_mixamo_rig: boolean = target_bones_meta.some(bone => bone.name.toLowerCase().includes('mixamorig'))
-    if (is_target_mixamo_rig) {
+    if (target_bone_mapping_type === TargetBoneMappingType.Mixamo) {
       console.log('Target skeleton appears to be a Mixamo rig, performing direct name mapping...')
       mappings = MixamoMapper.map_mixamo_bones(source_bones_meta, target_bones_meta)
       return mappings

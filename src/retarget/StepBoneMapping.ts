@@ -1,10 +1,22 @@
 import { type Group, type Object3D, type Object3DEventMap, type Scene, type SkinnedMesh } from 'three'
 import { SkeletonType } from '../lib/enums/SkeletonType.ts'
 import { BoneAutoMapper } from './BoneAutoMapper.ts'
+import { MixamoMapper } from './MixamoMapper.ts'
+
+// when we are auto-mapping, keep track of what rig type we matched target against
+export enum TargetBoneMappingType {
+  Mixamo = 'mixamo',
+  Mesh2Motion = 'mesh2motion',
+  Custom = 'custom', // trying to figure out bone mappings with bone name analysis
+  None = 'none'
+  // TODO: Add more types later
+}
 
 export class StepBoneMapping extends EventTarget {
   private readonly _main_scene: Scene
   private target_skeleton_data: Group<Object3DEventMap> | null = null
+  private target_mapping_template: TargetBoneMappingType = TargetBoneMappingType.None
+
   private source_armature: Object3D | null = null
   private source_skeleton_type: SkeletonType = SkeletonType.None
 
@@ -339,10 +351,18 @@ export class StepBoneMapping extends EventTarget {
       return
     }
 
+    // see if target bones follow a known template
+    if (MixamoMapper.is_target_valid_skeleton(this.get_target_bone_names())) {
+      this.target_mapping_template = TargetBoneMappingType.Mixamo
+    } else {
+      this.target_mapping_template = TargetBoneMappingType.Custom
+    }
+
     // Use BoneAutoMapper to generate mappings
     const auto_mappings = BoneAutoMapper.auto_map_bones(
-      this.source_armature!,
-      this.target_skeleton_data!
+      this.source_armature,
+      this.target_skeleton_data,
+      this.target_mapping_template
     )
 
     // Apply the auto-generated mappings
@@ -351,8 +371,19 @@ export class StepBoneMapping extends EventTarget {
     console.log(`Auto-mapped ${auto_mappings.size} bones:`, auto_mappings)
 
     // Update UI
+    this.polish_rig_after_bone_mappings()
     this.update_target_bones_list()
     this.update_clear_button_visibility()
     this.dispatchEvent(new CustomEvent('bone-mappings-changed'))
+  }
+
+  // some rig types don't have a root (like mixamo), so we need to rotate
+  // certain bones to get the model standing upright after retargeting
+  private polish_rig_after_bone_mappings (): void {
+    if (this.target_mapping_template === TargetBoneMappingType.Mixamo) {
+      console.log('Applying Mixamo rig polish adjustments since there is no root bone')
+      // for mixamo rigs, rotate the entire group by -90 degrees on X to get upright
+      // TODO: how to do this??
+    }
   }
 }

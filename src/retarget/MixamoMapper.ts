@@ -107,6 +107,15 @@ export class MixamoMapper {
   }
 
   /**
+   * Check if the given skeleton is a Mixamo skeleton
+   * @param bones - Bones to check
+   * @returns True if any bone name contains "mixamorig"
+   */
+  static is_target_valid_skeleton (bone_names: string[]): boolean {
+    return bone_names.some(name => name.toLowerCase().includes('mixamorig'))
+  }
+
+  /**
    * Map Mesh2Motion bones to Mixamo bones
    * @param source_bones - Mesh2Motion skeleton bones
    * @param target_bones - Mixamo skeleton bones
