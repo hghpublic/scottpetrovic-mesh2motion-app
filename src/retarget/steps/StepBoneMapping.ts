@@ -118,10 +118,11 @@ export class StepBoneMapping extends EventTarget {
 
   // Extract bone names from target skeleton (uploaded mesh)
   public get_target_bone_names (): string[] {
-    const skinned_meshes: SkinnedMesh[] = AnimationRetargetService.getInstance().get_target_skinned_meshes()
+    const target_armature: SkinnedMesh[] = AnimationRetargetService.getInstance().get_target_skinned_meshes()
 
-    if (skinned_meshes.length === 0) {
-      console.warn('get_target_bone_names(): No skinned meshes found in target armature.')
+    // when we first load the page, the target skinned mesh will be empty.
+    // this is expeted, so just return an empty list
+    if (target_armature.length === 0) {
       return []
     }
 
@@ -132,7 +133,7 @@ export class StepBoneMapping extends EventTarget {
 
     // Target skeleton data contains SkinnedMesh objects with skeleton property
     // Use Set to avoid duplicates when multiple SkinnedMesh share the same skeleton
-    skinned_meshes.forEach((skinned_mesh) => {
+    target_armature.forEach((skinned_mesh) => {
       skinned_mesh.skeleton.bones.forEach((bone) => {
         bone_names_set.add(bone.name)
       })
