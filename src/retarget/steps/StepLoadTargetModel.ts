@@ -92,22 +92,19 @@ export class StepLoadTargetModel extends EventTarget {
             this.mesh2motion_engine.get_scene().add(retargetable_meshes)
             const largest_dimension: number = this.calculate_max_mesh_dimension(retargetable_meshes)
 
-            // TODO: potential idea to fix. the M2M animations have a position offset for hips to root
-            // but this probably isn't being applied with the object scaling somehow?
-            if (largest_dimension > 40) {
+            // if the largest dimension is over 20, scale the entire scene down to be 
+            const target_height: number = 1.5 // in meters
+            if (largest_dimension > 20) {
+              // calculate scale factor
+              const scale_factor = target_height / largest_dimension
+              console.log('scaling model down because of ', largest_dimension)
               new ModalDialog('Large Rig Warning',
                 `The model you imported is large (${largest_dimension.toFixed(1)} meters). Mesh2Motion expects 1 unit = 1 meter. Your model will be scaled down. This will affect the retargeted animation results. This warning will go away whenever the developer can figure out how to correctly handle issues with.`).show()
-              retargetable_meshes.scale.set(0.01, 0.01, 0.01) // common case with 3d creation tools that use 1 cm = 1 unit
+              retargetable_meshes.scale.set(scale_factor, scale_factor, scale_factor) // common case with 3d creation tools that use 1 cm = 1 unit
             }
-            // if we are too large, scale down the model to fit better
-            // if (largest_dimension > 7) {
-            //   const scale_factor = 0.99
-            //   this.scale_skinned_meshes_to_fit_viewport(retargetable_meshes, scale_factor)
-            //   this.move_skinned_meshes_to_ground(retargetable_meshes)
-            // }
 
-            // Adjust camera based on model size
-            // this.adjust_camera_for_model(retargetable_meshes)
+            // need to compare skeletons. for some reason the GLBs scale down fine, but the FBX bones are not looking right
+            console.log('Final retargetable meshes after potential scaling:', retargetable_meshes)
 
             // Add skeleton helper
             this.add_skeleton_helper(retargetable_meshes)
@@ -125,40 +122,12 @@ export class StepLoadTargetModel extends EventTarget {
     }
   }
 
-  private move_skinned_meshes_to_ground (retargetable_meshes: Scene): void {
-    // Move so the lowest point is at y=0
-    retargetable_meshes.traverse((child) => {
-      if (child.type === 'SkinnedMesh') {
-        const skinned_mesh = child as SkinnedMesh
-        console.log('current position for mesh: ', skinned_mesh.position)
-        // skinned_mesh.position.set(0, 0, 0)
-        // skinned_mesh.updateMatrixWorld(true)
-      }
-    })
-  }
-
-  private scale_skinned_meshes_to_fit_viewport (retargetable_meshes: Scene, scale_factor: number): void {
-    // armatures seem to be the way to scale skinned meshes properly
-    // scale down the root bone of each skinned mesh
-    // it will automatically scale down the meshes along with it
-    retargetable_meshes.traverse((child) => {
-      if (child.type === 'SkinnedMesh') {
-        const skinned_mesh = child as SkinnedMesh
-
-        // Scale the skeleton root bone instead
-        if (skinned_mesh.skeleton.bones.length > 0) {
-          const root = skinned_mesh.skeleton.bones[0]
-          // Find the actual root (traverse up to the top-most bone)
-          let actual_root = root
-          while ((actual_root.parent != null) && actual_root.parent.type === 'Bone') {
-            actual_root = actual_root.parent as Bone
-          }
-          actual_root.scale.multiplyScalar(scale_factor)
-          actual_root.updateMatrixWorld(true)
-          skinned_mesh.skeleton.update()
-        }
-      }
-    })
+  private fix_fbx_mixamo_bones (): void {
+    // TODO: The FBX files for Mixamo do something weird with the bone hieararchy in three.js.
+    // The root bone is is the "hips" bone, and the first child of the hips bone is also named "hips".
+    // This is messing up stuff like the skeleton helper and probably the animations by assigning keyframes in the wrong way.
+    // The root hips bone is not in the "bones list" with the skeleton data, so I am not sure why that is there. I might have to look into the FBX loader
+    // class to see what is going on.
   }
 
   private add_skeleton_helper (retargetable_meshes: Scene): void {
@@ -177,50 +146,5 @@ export class StepLoadTargetModel extends EventTarget {
     const size = new Vector3()
     bounding_box.getSize(size)
     return Math.max(size.x, size.y, size.z)
-  }
-
-  private adjust_camera_for_model (model_group: Scene): void {
-    // Calculate bounding box of the model
-    const bounding_box = new Box3().setFromObject(model_group)
-
-    // Calculate model dimensions
-    const size = new Vector3()
-    bounding_box.getSize(size)
-
-    // Calculate center of the model
-    const center = new Vector3()
-    bounding_box.getCenter(center)
-
-    // Get the maximum dimension (height, width, or depth)
-    const max_dimension = Math.max(size.x, size.y, size.z)
-
-    // Disable fog for retargeting to prevent models from appearing foggy when zoomed far out
-    if (max_dimension > 50) {
-      console.log('Model is very large. Removing fog to increase visibility: ', max_dimension)
-      this.mesh2motion_engine.set_fog_enabled(false)
-    }
-
-    // Calculate appropriate camera distance
-    // Use a multiplier to ensure the entire model is visible
-    // The 2.5 multiplier provides good framing with some padding
-    const camera_distance = max_dimension * 2.5
-
-    // Position camera to look at the center of the model
-    // Keep camera slightly elevated (looking down at the model)
-    const camera_position = new Vector3(
-      center.x,
-      center.y + max_dimension * 0.3, // Slight elevation based on model size
-      center.z + camera_distance
-    )
-
-    this.mesh2motion_engine.set_camera_position(camera_position)
-
-    console.log('Adjusted camera for model:', {
-      bounding_box_size: size,
-      center,
-      max_dimension,
-      camera_distance,
-      camera_position
-    })
   }
 }
