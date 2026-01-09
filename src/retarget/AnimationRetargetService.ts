@@ -116,9 +116,9 @@ export class AnimationRetargetService {
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // if the source skeleton is of type human and the target mapping is Mixamo,
-    // we can try to apply the new Human Retarger system to do the retargeting
-    if (this.skeleton_type === SkeletonType.Human) {
+    // if the source skeleton is of type human, try tuse the human retargeting system
+    // we ignore Mesh2Motion type since that is identical to the source and does not need retargeting
+    if (this.skeleton_type === SkeletonType.Human && this.target_mapping_type !== TargetBoneMappingType.Mesh2Motion) {
       console.log('Using Human Retargeter for retargeting animation clip:', source_clip.name, this.target_mapping_type)
       return this.apply_human_swing_twist_retargeting(source_clip, this.target_mapping_type)
     }
