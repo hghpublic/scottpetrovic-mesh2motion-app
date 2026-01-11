@@ -57,7 +57,8 @@ export class Mesh2MotionEngine {
 
   // for looking at specific bones
   public process_step: ProcessStep = ProcessStep.LoadModel
-  public skeleton_helper: CustomSkeletonHelper | undefined = undefined
+  public skeleton_helper: CustomSkeletonHelper | THREE.SkeletonHelper | undefined = undefined
+  public use_custom_skeleton_helper: boolean = true // retargeting doesn't use this
   public debugging_visual_object: Group = new Group()
 
   // when editing the skeleton, what type of mesh will we see
@@ -133,6 +134,10 @@ export class Mesh2MotionEngine {
       this.controls.maxDistance = max_distance
       this.controls.update()
     }
+  }
+
+  public set_custom_skeleton_helper_enabled (enabled: boolean): void {
+    this.use_custom_skeleton_helper = enabled
   }
 
   public set_fog_enabled (enabled: boolean): void {
@@ -221,7 +226,12 @@ export class Mesh2MotionEngine {
       this.scene.remove(this.skeleton_helper)
     }
 
-    this.skeleton_helper = new CustomSkeletonHelper(new_skeleton.bones[0], { linewidth: 4, color: 0x4e7d58 })
+    if (this.use_custom_skeleton_helper) {
+      this.skeleton_helper = new CustomSkeletonHelper(new_skeleton.bones[0], { linewidth: 4, color: 0x4e7d58 })
+    } else {
+      this.skeleton_helper = new THREE.SkeletonHelper(new_skeleton.bones[0])
+    }
+
     this.skeleton_helper.name = helper_name
     this.scene.add(this.skeleton_helper)
   }
