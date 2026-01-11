@@ -35,6 +35,12 @@ export class Rig {
         continue
       }
 
+      // if all values in chain is empty, no point in building the rig item
+      const all_values_empty = chain_names.every(name => name === '')
+      if (all_values_empty) {
+        continue
+      }
+
       switch (k) {
         case 'pelvis' :
           this.buildItem(k, chain_names, new Vec3(0, 0, 1), new Vec3(0, 1, 0))
@@ -106,7 +112,8 @@ export class Rig {
     for (const n of names) {
       j = this.tpose.getJoint(n)
       if (j === null) {
-        console.log('Error - Rig.buildLimb : Joint name not found in tpose, ', n)
+        // some bones won't be mapped, so they will just be empty placeholders
+        // console.log('Error - Rig.buildLimb : Joint name not found in tpose, ', n)
         continue
       }
 

@@ -38,28 +38,23 @@ export class Retargeter {
     // Run Animation
     this.mixer.update(delta_time)
 
-    // Compute vectors from animation source
-    this.applyScaledTranslation('pelvis') // apply position scaling for hips
-    this.applyChain('pelvis')
-    this.applyEndInterp('spine')
-    this.applyChain('head')
+    // get a list of all the chains that exist. This list is generated
+    // from the config file when the Rig is built.
+    for (const chain_name of Object.keys(this.srcRig.chains)) {
+      // special chain that also has root motion
+      if (chain_name === 'pelvis') {
+        // Compute vectors from animation source
+        this.applyScaledTranslation(chain_name) // apply position scaling for hips
+      }
 
-    this.applyChain('armL')
-    this.applyChain('armR')
-    this.applyChain('legL')
-    this.applyChain('legR')
-
-    // fingers
-    this.applyChain('fingersThumbL')
-    this.applyChain('fingersThumbR')
-    this.applyChain('fingersIndexL')
-    this.applyChain('fingersIndexR')
-    this.applyChain('fingersMiddleL')
-    this.applyChain('fingersMiddleR')
-    this.applyChain('fingersRingL')
-    this.applyChain('fingersRingR')
-    this.applyChain('fingersPinkyL')
-    this.applyChain('fingersPinkyR')
+      // spine gets more fancy algorithm with using interpolation between first and
+      // last bones in chain
+      if (chain_name === 'spine' && this.is_full_chain('spine')) {
+        this.applyEndInterp('spine')
+      } else {
+        this.applyChain(chain_name)
+      }
+    }
 
     // Run Additives if any exist
     for (const i of this.additives) {
@@ -450,4 +445,19 @@ export class Retargeter {
     return target_rot
   }
   // #endregion
+
+  /**
+   *  Determines if a given chain has values in every slot. This will mess up the 
+   * interpolation calculations if trying applyEndInterp(). Use more simple applyChain() instead.
+   * @param chain_name string key for chain
+   * @returns boolean
+   */
+  private is_full_chain (chain_name: string): boolean {
+    const chain = this.tarRig.chains[chain_name]
+    if (chain.length === 0) {
+      return false
+    }
+
+    return chain.every((item) => item.idx !== -1)
+  }
 }
