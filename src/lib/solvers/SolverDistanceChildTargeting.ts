@@ -20,6 +20,50 @@ export default class SolverDistanceChildTargeting extends AbstractAutoSkinSolver
   private use_head_weight_correction: boolean = false
   private preview_plane_height: number = 1.4
 
+  public calculate_indexes_and_weights (): number[][] {
+    // There can be multiple objects that need skinning, so
+    // this will make sure we have a clean slate by putting it in function
+    const skin_indices: number[] = []
+    const skin_weights: number[] = []
+
+    // create cached items for all the vertex calculations later
+    // this.cached_bone_positions = this.get_bone_master_data().map(b => Utility.world_position_from_object(b))
+    this.cached_median_child_bone_positions = this.get_bone_master_data().map(b => this.midpoint_to_child(b))
+
+    this.get_bone_master_data().forEach((b, idx) => this.bone_object_to_index.set(b, idx))
+    this.distance_to_bottom_of_hip = this.calculate_distance_to_bottom_of_hip()
+
+    console.time('calculate_closest_bone_weights')
+    this.calculate_median_bone_weights(skin_indices, skin_weights)
+    this.smooth_bone_weight_boundaries(skin_indices, skin_weights)
+    console.timeEnd('calculate_closest_bone_weights')
+
+    if (this.show_debug) {
+      this.debugging_scene_object.add(this.objects_to_show_for_debugging(skin_indices))
+      this.points_to_show_for_debugging.length = 0 // Clear the points after adding to the scene
+    }
+
+    // find out if any weights aren't adding up to 1.0
+    // go through each incorrect weight influence. Fill in the 0.00 weight with the remaining weght so
+    // all the weights add up to 1.0
+    this.normalize_weights_with_incorrect_vertices(skin_weights)
+
+    // Apply head weight correction if enabled
+    if (this.use_head_weight_correction) {
+      const head_weight_corrector = new HeadWeightCorrector(
+        this.geometry,
+        this.get_bone_master_data(),
+        this.preview_plane_height
+      )
+      console.log('applying the head weight correction...')
+      head_weight_corrector.apply_head_weight_correction(skin_indices, skin_weights)
+    }
+
+    console.log('do we have any leftover incorrect weights ', this.find_vertices_with_incorrect_weight_sum(skin_weights))
+
+    return [skin_indices, skin_weights]
+  }
+
   /**
    * Enable or disable head weight correction
    */
@@ -37,7 +81,7 @@ export default class SolverDistanceChildTargeting extends AbstractAutoSkinSolver
   /**
    * Returns an array of vertex indices whose weights do not sum to 1.0 (within a small epsilon).
    */
-  public find_vertices_with_incorrect_weight_sum (skin_weights: number[]): number[] {
+  private find_vertices_with_incorrect_weight_sum (skin_weights: number[]): number[] {
     const epsilon: number = 1e-4 // very small number to signify close enough to 0
     const incorrect_vertices: number[] = []
     const vertex_count = this.geometry_vertex_count()
@@ -163,50 +207,6 @@ export default class SolverDistanceChildTargeting extends AbstractAutoSkinSolver
         }
       }
     }
-  }
-
-  public calculate_indexes_and_weights (): number[][] {
-    // There can be multiple objects that need skinning, so
-    // this will make sure we have a clean slate by putting it in function
-    const skin_indices: number[] = []
-    const skin_weights: number[] = []
-
-    // create cached items for all the vertex calculations later
-    // this.cached_bone_positions = this.get_bone_master_data().map(b => Utility.world_position_from_object(b))
-    this.cached_median_child_bone_positions = this.get_bone_master_data().map(b => this.midpoint_to_child(b))
-
-    this.get_bone_master_data().forEach((b, idx) => this.bone_object_to_index.set(b, idx))
-    this.distance_to_bottom_of_hip = this.calculate_distance_to_bottom_of_hip()
-
-    console.time('calculate_closest_bone_weights')
-    this.calculate_median_bone_weights(skin_indices, skin_weights)
-    this.smooth_bone_weight_boundaries(skin_indices, skin_weights)
-    console.timeEnd('calculate_closest_bone_weights')
-
-    if (this.show_debug) {
-      this.debugging_scene_object.add(this.objects_to_show_for_debugging(skin_indices))
-      this.points_to_show_for_debugging.length = 0 // Clear the points after adding to the scene
-    }
-
-    // find out if any weights aren't adding up to 1.0
-    // go through each incorrect weight influence. Fill in the 0.00 weight with the remaining weght so
-    // all the weights add up to 1.0
-    this.normalize_weights_with_incorrect_vertices(skin_weights)
-
-    // Apply head weight correction if enabled
-    if (this.use_head_weight_correction) {
-      const head_weight_corrector = new HeadWeightCorrector(
-        this.geometry,
-        this.get_bone_master_data(),
-        this.preview_plane_height
-      )
-      console.log('applying the head weight correction...')
-      head_weight_corrector.apply_head_weight_correction(skin_indices, skin_weights)
-    }
-
-    console.log('do we have any leftover incorrect weights ', this.find_vertices_with_incorrect_weight_sum(skin_weights))
-
-    return [skin_indices, skin_weights]
   }
 
   private normalize_weights_with_incorrect_vertices (all_skin_weights: number[]): void {

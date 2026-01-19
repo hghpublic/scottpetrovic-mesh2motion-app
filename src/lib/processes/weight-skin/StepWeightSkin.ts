@@ -1,8 +1,6 @@
 import { UI } from '../../UI.ts'
 import SolverDistanceChildTargeting from '../../solvers/SolverDistanceChildTargeting.ts'
 
-import { SkinningFormula } from '../../enums/SkinningFormula.ts'
-
 import { Generators } from '../../Generators.ts'
 
 import { type BufferGeometry, type Material, type Object3D, type Skeleton, SkinnedMesh, type Scene, Group, Uint16BufferAttribute, Float32BufferAttribute } from 'three'
@@ -80,20 +78,6 @@ export class StepWeightSkin extends EventTarget {
     this.bone_skinning_formula.set_geometry(geometry)
   }
 
-  public test_geometry (): BoneTesterData {
-    if (this.bone_skinning_formula === undefined) {
-      console.warn('Tried to test_geometry() in weight skinning step, but bone_skinning_formula is undefined!')
-      return new BoneTesterData([], [])
-    }
-
-    if (this.show_debug) {
-      this.bone_skinning_formula.set_show_debug(this.show_debug)
-      this.bone_skinning_formula.set_debugging_scene_object(this.debug_scene_object)
-      this.bone_skinning_formula.set_bone_index_to_test(this.bone_index_to_test)
-    }
-
-    return this.bone_skinning_formula.test_bones_outside_in_mesh()
-  }
 
   public create_binding_skeleton (): void {
     if (this.skinning_armature === undefined) {

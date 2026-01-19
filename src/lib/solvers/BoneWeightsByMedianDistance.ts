@@ -82,9 +82,4 @@ export default class BoneWeightsByMedianDistance implements IAutoSkinSolver {
     const output = [this.skin_indices, this.skin_weights]
     return output
   }
-
-  public test_bones_outside_in_mesh (): BoneTesterData {
-    // don't do test for now and just return success
-    return new BoneTesterData([], [])
-  }
 } // end class

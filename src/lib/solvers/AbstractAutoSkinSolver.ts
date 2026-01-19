@@ -47,10 +47,6 @@ export abstract class AbstractAutoSkinSolver {
     return this.bones_master_data
   }
 
-  public test_bones_outside_in_mesh (): BoneTesterData {
-    return new BoneTesterData([], [])
-  }
-
   protected geometry_vertex_count (): number {
     if (this.geometry === null) {
       console.error('Geometry is null. cannot get vertex count')

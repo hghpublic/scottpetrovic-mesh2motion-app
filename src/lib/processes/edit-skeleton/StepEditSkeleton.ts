@@ -17,7 +17,6 @@ import {
   TextureLoader,
   type Camera
 } from 'three'
-import { SkinningFormula } from '../../enums/SkinningFormula.ts'
 import { SkeletonType } from '../../enums/SkeletonType.ts'
 
 /*
