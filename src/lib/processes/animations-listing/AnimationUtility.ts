@@ -133,10 +133,10 @@ export class AnimationUtility {
         const track_name = track.name
 
         // Check if this is a left track that we haven't already processed
-        if (track_name.endsWith('L.quaternion')) {
+        if (track_name.toLowerCase().endsWith('_l.quaternion')) {
           // Find the corresponding right track
-          const right_track_name = track_name.replace(/L\.quaternion$/, 'R.quaternion')
-          const right_track_index = tracks.findIndex(t => t.name === right_track_name)
+          const right_track_name = track_name.replace(/_l\.quaternion$/, '_r.quaternion')
+          const right_track_index = tracks.findIndex(t => t.name.toLowerCase() === right_track_name)
 
           if (right_track_index !== -1) {
             track_swaps.push({ leftIndex: i, rightIndex: right_track_index, clipDetails: clip_name + ':' + track_name })
