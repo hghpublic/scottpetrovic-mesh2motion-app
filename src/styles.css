@@ -407,7 +407,7 @@ option {
 
 
 
-.anim-item {
+.anim-item, .anim-custom-item {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -419,6 +419,12 @@ option {
     width: 103px;
     height: 160px;
 }
+
+.anim-custom-item {
+    background: var(--bg-primary);
+    border: 1px solid var(--bg-tertiary);
+}
+
 
 .anim-preview-label {
     font-size: 90%;

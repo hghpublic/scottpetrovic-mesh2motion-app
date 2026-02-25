@@ -4,7 +4,7 @@ import { type AnimationClip, type SkinnedMesh } from 'three'
 import { type AnimationLoader } from './AnimationLoader.ts'
 import { NoAnimationsError, IncompatibleSkeletonError, LoadError } from './AnimationImportErrors.ts'
 import CustomAnimationValidation from './CustomAnimationValidation.ts'
-import { type TransformedAnimationClipPair } from './interfaces/TransformedAnimationClipPair.ts'
+import { AnimationClipMetadata, type TransformedAnimationClipPair } from './interfaces/TransformedAnimationClipPair.ts'
 
 /**
  * Handles the importing of custom animations from GLB files.
@@ -107,10 +107,18 @@ export class CustomAnimationImporter extends EventTarget {
   }
 
   private async import_animation_glb (file: File): Promise<{ success: boolean, clipCount: number }> {
+    // tell the animation data these are custom animations to help differentiate for custom video previews
+    // tags are unused right now, but I want to eventually use them to help filtering
+    const metadata_override: Partial<AnimationClipMetadata> = {
+      source_type: 'custom-import',
+      tags: []
+    }
+
     try {
       const new_animation_clips = await this.animation_loader.load_animations_from_file(
         file,
-        this.skeleton_scale
+        this.skeleton_scale,
+        metadata_override
       )
 
       // Validate custom animations against our target skeleton

@@ -122,9 +122,7 @@ export class RetargetAnimationListing extends EventTarget {
     })
 
     // Build animation UI
-    this.build_animation_clip_ui(
-      this.animation_clips_loaded.map(clip => clip.display_animation_clip)
-    )
+    this.build_animation_clip_ui(this.animation_clips_loaded)
 
     // Update animation selection count when selections change
     this.animation_search?.addEventListener('export-options-changed', () => {
@@ -144,7 +142,7 @@ export class RetargetAnimationListing extends EventTarget {
     console.log(`Loaded ${this.animation_clips_loaded.length} animations for retargeting`)
   }
 
-  private build_animation_clip_ui (animation_clips: AnimationClip[]): void {
+  private build_animation_clip_ui (animation_clips: TransformedAnimationClipPair[]): void {
     // Initialize AnimationSearch with the loaded clips
     this.animation_search = new AnimationSearch(
       'animation-filter',

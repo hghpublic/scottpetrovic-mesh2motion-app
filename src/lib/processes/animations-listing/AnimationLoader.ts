@@ -2,7 +2,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { type AnimationClip } from 'three'
 import { AnimationUtility } from './AnimationUtility.ts'
 import { SkeletonType } from '../../enums/SkeletonType.ts'
-import { type TransformedAnimationClipPair } from './interfaces/TransformedAnimationClipPair.ts'
+import { type AnimationClipMetadata, type TransformedAnimationClipPair } from './interfaces/TransformedAnimationClipPair.ts'
 import { LoadError, NoAnimationsError } from './AnimationImportErrors.ts'
 
 export interface AnimationLoadProgress {
@@ -23,6 +23,13 @@ export class AnimationLoader extends EventTarget {
   private readonly file_progress_map = new Map<string, { loaded: number, total: number }>()
   private completed_files: number = 0
   private total_files: number = 0
+
+  private create_default_metadata (): AnimationClipMetadata {
+    return {
+      source_type: 'default-library',
+      tags: []
+    }
+  }
 
   /**
    * Sets the base path for animation files
@@ -78,7 +85,14 @@ export class AnimationLoader extends EventTarget {
               this.completed_files++
 
               // Process the loaded animations
-              const processed_clips = this.process_loaded_animations(gltf.animations as AnimationClip[], skeleton_scale)
+              const processed_clips = this.process_loaded_animations(
+                gltf.animations as AnimationClip[],
+                skeleton_scale,
+                {
+                  source_type: 'default-library',
+                  tags: []
+                }
+              )
               loaded_clips.push(...processed_clips)
 
               completed_loads++
@@ -136,7 +150,8 @@ export class AnimationLoader extends EventTarget {
    */
   public async load_animations_from_file (
     file: File,
-    skeleton_scale: number = 1.0
+    skeleton_scale: number = 1.0,
+    metadata_override: Partial<AnimationClipMetadata> = {}
   ): Promise<TransformedAnimationClipPair[]> {
     const file_url = URL.createObjectURL(file)
     const file_total = file.size > 0 ? file.size : 1
@@ -166,7 +181,11 @@ export class AnimationLoader extends EventTarget {
             this.completed_files = 1
             this.emit_enhanced_progress(file.name, file_total, file_total)
 
-            const processed_clips = this.process_loaded_animations(animations, skeleton_scale)
+            const processed_clips = this.process_loaded_animations(
+              animations,
+              skeleton_scale,
+              metadata_override
+            )
             resolve(processed_clips)
           } catch (error) {
             // Emit final progress to hide the loader UI
@@ -229,7 +248,8 @@ export class AnimationLoader extends EventTarget {
    */
   public process_loaded_animations (
     raw_animations: AnimationClip[],
-    skeleton_scale: number
+    skeleton_scale: number,
+    metadata_override: Partial<AnimationClipMetadata> = {}
   ): TransformedAnimationClipPair[] {
     // Deep clone the animations to avoid modifying originals
     const cloned_animations = AnimationUtility.deep_clone_animation_clips(raw_animations)
@@ -243,7 +263,11 @@ export class AnimationLoader extends EventTarget {
     // Create the transformed pairs
     return cloned_animations.map(clip => ({
       original_animation_clip: clip,
-      display_animation_clip: AnimationUtility.deep_clone_animation_clip(clip)
+      display_animation_clip: AnimationUtility.deep_clone_animation_clip(clip),
+      metadata: {
+        ...this.create_default_metadata(),
+        ...metadata_override
+      }
     }))
   }
 

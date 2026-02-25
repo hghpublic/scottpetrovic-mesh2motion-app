@@ -13,7 +13,7 @@ import { SkeletonType } from '../../enums/SkeletonType.ts'
 import { Utility } from '../../Utilities.ts'
 import { type ThemeManager } from '../../ThemeManager.ts'
 import { AnimationSearch } from './AnimationSearch.ts'
-import { type TransformedAnimationClipPair } from './interfaces/TransformedAnimationClipPair.ts'
+import { type AnimationClipMetadata, type TransformedAnimationClipPair } from './interfaces/TransformedAnimationClipPair.ts'
 
 // Note: EventTarget is a built-ininterface and do not need to import it
 export class StepAnimationsListing extends EventTarget {
@@ -142,6 +142,18 @@ export class StepAnimationsListing extends EventTarget {
     return this.animation_clips_loaded.map(clip => clip.display_animation_clip)
   }
 
+  public get_animation_metadata (index: number): AnimationClipMetadata | null {
+    if (index < 0 || index >= this.animation_clips_loaded.length) {
+      return null
+    }
+
+    return this.animation_clips_loaded[index].metadata
+  }
+
+  public is_animation_custom (index: number): boolean {
+    return this.get_animation_metadata(index)?.source_type === 'custom-import'
+  }
+
   public load_and_apply_default_animation_to_skinned_mesh (final_skinned_meshes: SkinnedMesh[]): void {
     this.skinned_meshes_to_animate = final_skinned_meshes
 
@@ -182,7 +194,7 @@ export class StepAnimationsListing extends EventTarget {
 
     // create user interface with all available animation clips
     this.build_animation_clip_ui(
-      this.animation_clips_loaded.map(clip => clip.display_animation_clip),
+      this.animation_clips_loaded,
       this.theme_manager
     )
 
@@ -392,7 +404,7 @@ export class StepAnimationsListing extends EventTarget {
     this.play_animation(this.current_playing_index)
   }
 
-  public build_animation_clip_ui (animation_clips_to_load: AnimationClip[], theme_manager: ThemeManager): void {
+  public build_animation_clip_ui (animation_clips_to_load: TransformedAnimationClipPair[], theme_manager: ThemeManager): void {
     // Initialize AnimationSearch if not already done
     // we could switch skeleton types using navigation, so need to re-create in case this happens
     this.animation_search = new AnimationSearch('animation-filter', 'animations-items', theme_manager, this.skeleton_type)
