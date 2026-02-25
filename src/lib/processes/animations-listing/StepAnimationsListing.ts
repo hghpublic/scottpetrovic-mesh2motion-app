@@ -62,11 +62,7 @@ export class StepAnimationsListing extends EventTarget {
     this.animation_player = new AnimationPlayer()
     this.theme_manager = theme_manager
 
-    this.custom_animation_importer = new CustomAnimationImporter(
-      this.animation_loader,
-      this.skinned_meshes_to_animate,
-      this.skeleton_scale
-    )
+    this.custom_animation_importer = new CustomAnimationImporter(this.animation_loader)
 
     // fancy way to bind the import context by implementing the function
     // from the CustomAnimationImporter and passing in the current context values. this allows

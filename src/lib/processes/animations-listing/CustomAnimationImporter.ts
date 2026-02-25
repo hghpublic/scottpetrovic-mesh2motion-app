@@ -13,22 +13,16 @@ import { type TransformedAnimationClipPair } from './interfaces/TransformedAnima
 export class CustomAnimationImporter extends EventTarget {
   private readonly ui: UI
   private readonly animation_loader: AnimationLoader
-  private skinned_meshes_to_animate: SkinnedMesh[]
-  private skeleton_scale: number
+  private skinned_meshes_to_animate: SkinnedMesh[] = []
+  private skeleton_scale: number = 1.0
   private import_context_provider: (() => { skinned_meshes_to_animate: SkinnedMesh[], skeleton_scale: number }) | null = null
   private enabled: boolean = true
   private has_added_event_listeners: boolean = false
 
-  constructor (
-    animation_loader: AnimationLoader,
-    skinned_meshes_to_animate: SkinnedMesh[],
-    skeleton_scale: number
-  ) {
+  constructor (animation_loader: AnimationLoader) {
     super()
     this.ui = UI.getInstance()
     this.animation_loader = animation_loader
-    this.skinned_meshes_to_animate = skinned_meshes_to_animate
-    this.skeleton_scale = skeleton_scale
     this.add_event_listeners()
   }
 
@@ -120,6 +114,7 @@ export class CustomAnimationImporter extends EventTarget {
       )
 
       // Validate custom animations against our target skeleton
+      const animation_clip_names_imported = new_animation_clips.map(clip_pair => clip_pair.display_animation_clip.name).join(', ')
       const clips_to_validate: AnimationClip[] = new_animation_clips.map((clip_pair) => clip_pair.display_animation_clip)
       CustomAnimationValidation.validate_animation_bones_match(clips_to_validate, this.skinned_meshes_to_animate)
 
@@ -131,7 +126,7 @@ export class CustomAnimationImporter extends EventTarget {
       const animation_word = animation_count === 1 ? 'animation' : 'animations'
       new ModalDialog(
         'Import Success',
-        `${animation_count} ${animation_word} Imported successfully`
+        `${animation_count} ${animation_word} Imported successfully: ${animation_clip_names_imported}`
       ).show()
 
       return { success: true, clipCount: new_animation_clips.length }
@@ -170,9 +165,5 @@ export class CustomAnimationImporter extends EventTarget {
     }
 
     return 'Bone names don\'t match'
-  }
-
-  private validate_loaded_animation_clips (new_animation_clips: TransformedAnimationClipPair[]): void {
-
   }
 }
