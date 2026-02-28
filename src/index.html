@@ -45,6 +45,15 @@
 
     <!-- Top toolbar with mouse controls -->
     <div id="header-ui">
+
+        <!-- checkbox option to show skeleton -->
+        <div id="skeleton-toggle" class="styled-checkbox icon-toggle" >
+            <input type="checkbox" id="show-skeleton-checkbox" name="show-skeleton" value="show" style="display:none;">
+            <label for="show-skeleton-checkbox" data-tippy-content="Show skeleton"  tabindex="0">
+                <img src="./images/icons/bone-display.svg" width="30" height="30" alt="Show skeleton" />
+            </label>
+        </div>
+
         <div>
             <img src="./images/mouse-left.svg" height="30" width="30" style="vertical-align: middle;"/> Rotate
         </div>
@@ -135,15 +144,6 @@
        
 
                     <div style="display: flex; gap: 0.5rem;">
-                        <!-- checkbox option to show skeleton -->
-                        <div class="styled-checkbox icon-toggle">
-                            <input type="checkbox" id="show-skeleton-checkbox" name="show-skeleton" value="show" style="display:none;">
-                            <label for="show-skeleton-checkbox" data-tippy-content="Show skeleton"  tabindex="0">
-                                <img src="./images/icons/bone-display.svg" width="30" height="30" alt="Show skeleton" />
-                            </label>
-                        </div>
-                        
-
                         
                         <!-- testing the mirroring options -->
                         <div class="styled-checkbox icon-toggle">
@@ -196,6 +196,7 @@
         </div>
 
     </div>
+
 
     <!-- 3d view control hit box. It is just a container to help with 3d view controls. -->
     <div id="view-control-hitbox"></div>

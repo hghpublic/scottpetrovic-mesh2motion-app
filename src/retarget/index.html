@@ -168,17 +168,7 @@
                     <div style="display: flex; gap: 0.5rem;">
                         <button class="secondary-button" id="back_to_bone_map_button" >&#x2039; Back</button>
 
-
-                        <!-- checkbox option to show skeleton -->
-                        <div class="styled-checkbox icon-toggle">
-                            <input type="checkbox" id="show-skeleton-checkbox" name="show-skeleton" value="show" style="display:none;">
-                            <label for="show-skeleton-checkbox" data-tippy-content="Show skeleton"  tabindex="0">
-                                <img src="../images/icons/bone-display.svg" width="30" height="30" alt="Show skeleton" />
-                            </label>
-                        </div>
-
-                        <!-- I renamed the button ID since we need to process the aniamtions different
-                             -->
+                        <!-- I renamed the button ID since we need to process the animations differently -->
                         <button id="export-retargeting-button" title="Export animations. Make sure to select the animations you want to export first.">
                             <span class="button-icon-group">
                                 <span class="material-symbols-outlined">save_alt</span>
@@ -219,6 +209,14 @@
 
     <!-- Top toolbar with mouse controls -->
     <div id="header-ui">
+
+        <div id="skeleton-toggle" class="styled-checkbox icon-toggle" >
+            <input type="checkbox" id="show-skeleton-checkbox" name="show-skeleton" value="show" style="display:none;">
+            <label for="show-skeleton-checkbox" data-tippy-content="Show skeleton"  tabindex="0">
+                <img src="../images/icons/bone-display.svg" width="30" height="30" alt="Show skeleton" />
+            </label>
+        </div>
+
         <div>
             <img src="/images/mouse-left.svg" height="30" width="30" style="vertical-align: middle;"/> Rotate
         </div>

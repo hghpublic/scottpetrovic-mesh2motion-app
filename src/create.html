@@ -44,6 +44,15 @@
 
     <!-- Top toolbar with mouse controls -->
     <div id="header-ui">
+
+        <!-- checkbox option to show skeleton -->
+        <div id="skeleton-toggle" class="styled-checkbox icon-toggle" >
+            <input type="checkbox" id="show-skeleton-checkbox" name="show-skeleton" value="show" style="display:none;">
+            <label for="show-skeleton-checkbox" data-tippy-content="Show skeleton"  tabindex="0">
+                <img src="./images/icons/bone-display.svg" width="30" height="30" alt="Show skeleton" />
+            </label>
+        </div>
+
         <div>
             <img src="images/mouse-left.svg" height="30" width="30" style="vertical-align: middle;"/> Rotate
         </div>
@@ -375,15 +384,6 @@
                             <span class="material-symbols-outlined">upload</span>
                         </button>
                         <input id="import-animations-input" type="file" accept=".glb" multiple style="display:none" />
-
-
-                        <!-- checkbox option to show skeleton -->
-                        <div class="styled-checkbox icon-toggle">
-                            <input type="checkbox" id="show-skeleton-checkbox" name="show-skeleton" value="show" style="display:none;">
-                            <label for="show-skeleton-checkbox" data-tippy-content="Show skeleton"  tabindex="0">
-                                <img src="images/icons/bone-display.svg" width="30" height="30" alt="Show skeleton" />
-                            </label>
-                        </div>
 
                         <button id="export-button" title="Export animations. Make sure to select the animations you want to export first.">
                             <span class="button-icon-group">
