@@ -253,17 +253,12 @@ export class Mesh2MotionEngine {
       this.edit_skeleton_step.apply_mirror_mode(selected_bone, this.transform_controls.getMode())
     }
 
-    if (this.edit_skeleton_step.is_independent_bone_movement_enabled() &&
+    if (this.edit_skeleton_step.independent_bone_movement.is_enabled() &&
         this.transform_controls.getMode() === 'translate') {
-      this.edit_skeleton_step.apply_independent_bone_movement(selected_bone)
-
-      // When mirror mode is also active, keep the mirror bone's children in place too
-      if (this.edit_skeleton_step.is_mirror_mode_enabled()) {
-        const mirror_bone = this.edit_skeleton_step.find_mirror_bone(selected_bone)
-        if (mirror_bone !== undefined) {
-          this.edit_skeleton_step.apply_independent_bone_movement(mirror_bone)
-        }
-      }
+      const mirror_bone = this.edit_skeleton_step.is_mirror_mode_enabled()
+        ? this.edit_skeleton_step.find_mirror_bone(selected_bone)
+        : undefined
+      this.edit_skeleton_step.independent_bone_movement.apply(selected_bone, mirror_bone)
     }
   }
 

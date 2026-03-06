@@ -3,6 +3,7 @@ import { Generators } from '../../Generators.ts'
 import { Utility } from '../../Utilities.ts'
 import { UndoRedoSystem } from './UndoRedoSystem.ts'
 import { PreviewPlaneManager } from './PreviewPlaneManager.ts'
+import { IndependentBoneMovement } from './IndependentBoneMovement.ts'
 import {
   Vector3,
   Euler,
@@ -37,8 +38,6 @@ export class StepEditSkeleton extends EventTarget {
   // Skeleton created from the armature that Three.js uses
   private threejs_skeleton: Skeleton = new Skeleton()
   private mirror_mode_enabled: boolean = true
-  private independent_bone_movement_enabled: boolean = false
-  private _children_initial_world_positions: Map<string, Vector3> = new Map()
   private skinning_algorithm: string | null = null
   private show_debug: boolean = true
 
@@ -55,6 +54,7 @@ export class StepEditSkeleton extends EventTarget {
 
   private _added_event_listeners: boolean = false
   private readonly preview_plane_manager: PreviewPlaneManager = PreviewPlaneManager.getInstance()
+  public readonly independent_bone_movement: IndependentBoneMovement = new IndependentBoneMovement()
 
   constructor () {
     super()
@@ -208,14 +208,6 @@ export class StepEditSkeleton extends EventTarget {
     return this.mirror_mode_enabled
   }
 
-  public set_independent_bone_movement_enabled (value: boolean): void {
-    this.independent_bone_movement_enabled = value
-  }
-
-  public is_independent_bone_movement_enabled (): boolean {
-    return this.independent_bone_movement_enabled
-  }
-
   /**
    * Find the mirrored counterpart of a bone by stripping side suffixes and
    * matching against the rest of the skeleton. Returns undefined for centre-line
@@ -226,57 +218,6 @@ export class StepEditSkeleton extends EventTarget {
     return this.threejs_skeleton.bones.find((candidate) => {
       const candidate_base = Utility.calculate_bone_base_name(candidate.name)
       return candidate_base === base_name && candidate.name !== bone.name
-    })
-  }
-
-  /**
-   * Record the current world positions of the direct bone children.
-   * Clears any previously recorded positions, then stores the children of the
-   * given bone. Call this when dragging starts so children can be restored to
-   * these positions during independent bone movement.
-   * Use record_mirror_bone_children_initial_positions() afterwards when mirror
-   * mode is also active to append the mirror bone's children to the same map.
-   */
-  public record_children_initial_positions (bone: Bone): void {
-    this._children_initial_world_positions.clear()
-    this._append_children_world_positions(bone)
-  }
-
-  /**
-   * Append the current world positions of a bone's direct children to the
-   * existing position map without clearing it. Use this after
-   * record_children_initial_positions() to also track the mirror bone's
-   * children when both mirror mode and independent bone movement are active.
-   */
-  public record_mirror_bone_children_initial_positions (bone: Bone): void {
-    this._append_children_world_positions(bone)
-  }
-
-  private _append_children_world_positions (bone: Bone): void {
-    bone.children.forEach((child) => {
-      if ('isBone' in child && child.isBone) {
-        const world_pos = new Vector3()
-        child.getWorldPosition(world_pos)
-        this._children_initial_world_positions.set(child.uuid, world_pos.clone())
-      }
-    })
-  }
-
-  /**
-   * Keep direct bone children at their initial world positions while the
-   * parent bone is being moved. Call this each frame during a drag when
-   * independent bone movement mode is active.
-   */
-  public apply_independent_bone_movement (bone: Bone): void {
-    bone.children.forEach((child) => {
-      if (!('isBone' in child) || !child.isBone) { return }
-      const initial_world_pos = this._children_initial_world_positions.get(child.uuid)
-      if (initial_world_pos === undefined) { return }
-      const local_pos = initial_world_pos.clone()
-      bone.worldToLocal(local_pos)
-      child.position.copy(local_pos)
-      // updateWorldMatrix(updateParents, updateChildren) - propagate changes up and down the hierarchy
-      child.updateWorldMatrix(true, true)
     })
   }
 
@@ -335,7 +276,7 @@ export class StepEditSkeleton extends EventTarget {
 
     if (this.ui.dom_independent_bone_movement_checkbox !== null) {
       this.ui.dom_independent_bone_movement_checkbox.addEventListener('change', (event) => {
-        this.set_independent_bone_movement_enabled(event.target.checked)
+        this.independent_bone_movement.set_enabled(event.target.checked)
       })
     }
 
