@@ -67,6 +67,8 @@ export class Mesh2MotionEngine {
   public transform_space_type: TransformSpace = TransformSpace.Global
 
   private readonly clock = new THREE.Clock()
+  private readonly fog_near: number = 20
+  private readonly fog_far: number = 80
 
   private environment_container: Group = new Group()
   private readonly eventListeners: EventListeners
@@ -142,15 +144,31 @@ export class Mesh2MotionEngine {
 
   public set_fog_enabled (enabled: boolean): void {
     if (enabled) {
-      // Determine fog color based on theme
-      let floor_color = 0x2d4353
-      if (this.theme_manager.get_current_theme() === 'light') {
-        floor_color = 0xecf0f1
-      }
-      this.scene.fog = new THREE.Fog(floor_color, 20, 80)
+      this.apply_scene_fog()
     } else {
       this.scene.fog = null
     }
+  }
+
+  private get_environment_colors (): { grid_color: number, floor_color: number, light_strength: number } {
+    if (this.theme_manager.get_current_theme() === 'light') {
+      return {
+        grid_color: 0xcccccc,
+        floor_color: 0xecf0f1,
+        light_strength: 14
+      }
+    }
+
+    return {
+      grid_color: 0x4f6f6f,
+      floor_color: 0x2d4353,
+      light_strength: 10
+    }
+  }
+
+  private apply_scene_fog (): void {
+    const { floor_color } = this.get_environment_colors()
+    this.scene.fog = new THREE.Fog(floor_color, this.fog_near, this.fog_far)
   }
 
   private setup_environment (): void {
@@ -201,17 +219,9 @@ export class Mesh2MotionEngine {
       this.scene.remove(setup_container)
     }
 
-    // change color of grid based on theme
-    let grid_color = 0x4f6f6f
-    let floor_color = 0x2d4353
-    let light_strength: number = 10
-    if (this.theme_manager.get_current_theme() === 'light') {
-      grid_color = 0xcccccc // light theme color
-      floor_color = 0xecf0f1 // light theme color
-      light_strength = 14
-    }
+    const { grid_color, floor_color, light_strength } = this.get_environment_colors()
 
-    this.scene.fog = new THREE.Fog(floor_color, 20, 80)
+    this.apply_scene_fog()
 
     this.environment_container = new Group()
     this.environment_container.name = 'Setup objects'
