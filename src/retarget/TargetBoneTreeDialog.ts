@@ -3,6 +3,7 @@ import { ModalDialog } from '../lib/ModalDialog.ts'
 
 export class TargetBoneTreeDialog {
   private target_bones: Map<string, Bone> = new Map<string, Bone>()
+  private target_skinned_mesh_count: number = 0
   private view_bone_tree_button: HTMLSpanElement | null = null
   private has_added_event_listeners: boolean = false
 
@@ -22,6 +23,10 @@ export class TargetBoneTreeDialog {
     this.target_bones = target_bones
   }
 
+  public set_target_skinned_mesh_count (target_skinned_mesh_count: number): void {
+    this.target_skinned_mesh_count = Math.max(0, target_skinned_mesh_count)
+  }
+
   public show (): void {
     const target_bones = this.target_bones
     const root_target_bones = TargetBoneTreeDialog.get_root_bones(target_bones)
@@ -39,6 +44,7 @@ export class TargetBoneTreeDialog {
       <div class="bone-tree-dialog-summary">
         <span>Total bones: ${target_bones.size}</span>
         <span>Root chains: ${root_target_bones.length}</span>
+        <span>Skinned meshes: ${this.target_skinned_mesh_count}</span>
       </div>
       <ul class="bone-tree-dialog-list">
         ${tree_html}

@@ -49,6 +49,7 @@ export class StepLoadTargetModel extends EventTarget {
 
   public show_target_bone_tree_dialog (): void {
     this.target_bone_tree_dialog.set_target_bones(this.get_unique_target_bones())
+    this.target_bone_tree_dialog.set_target_skinned_mesh_count(this.get_target_skinned_mesh_count())
     this.target_bone_tree_dialog.show()
   }
 
@@ -138,6 +139,7 @@ export class StepLoadTargetModel extends EventTarget {
             // Save the final retargetable meshes and dispatch event
             this.retargetable_meshes = retargetable_meshes
             this.target_bone_tree_dialog.set_target_bones(this.get_unique_target_bones())
+            this.target_bone_tree_dialog.set_target_skinned_mesh_count(this.get_target_skinned_mesh_count())
             this.dispatchEvent(new CustomEvent('target-model-loaded'))
           }
         }, { once: true })
@@ -164,6 +166,18 @@ export class StepLoadTargetModel extends EventTarget {
         this.mesh2motion_engine.regenerate_skeleton_helper(skinned_mesh.skeleton, 'Retarget Skeleton Helper')
       }
     })
+  }
+
+  private get_target_skinned_mesh_count (): number {
+    let skinned_mesh_count = 0
+
+    this.retargetable_meshes?.traverse((child) => {
+      if (child.type === 'SkinnedMesh') {
+        skinned_mesh_count++
+      }
+    })
+
+    return skinned_mesh_count
   }
 
   // gets max dimension of the model for scaling
