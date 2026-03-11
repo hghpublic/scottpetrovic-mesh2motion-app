@@ -1,8 +1,9 @@
-import { type Scene, type SkinnedMesh } from 'three'
+import { type Bone, type Scene, type SkinnedMesh } from 'three'
 import { BoneAutoMapper } from '../bone-automap/BoneAutoMapper.ts'
 import { MixamoMapper } from '../bone-automap/MixamoMapper.ts'
 import { AnimationRetargetService } from '../AnimationRetargetService.ts'
 import { Mesh2MotionMapper } from '../bone-automap/Mesh2MotionMapper.ts'
+import { ModalDialog } from '../../lib/ModalDialog.ts'
 
 // when we are auto-mapping, keep track of what rig type we matched target against
 export enum TargetBoneMappingType {
@@ -19,6 +20,7 @@ export class StepBoneMapping extends EventTarget {
   private target_bones_list: HTMLDivElement | null = null
   private clear_mappings_button: HTMLButtonElement | null = null
   private auto_map_button: HTMLButtonElement | null = null
+  private view_bone_tree_button: HTMLButtonElement | null = null
   private source_bone_count: HTMLSpanElement | null = null
   private target_bone_count: HTMLSpanElement | null = null
   private auto_bone_map_match_display: HTMLSpanElement | null = null
@@ -35,6 +37,7 @@ export class StepBoneMapping extends EventTarget {
     this.target_bones_list = document.getElementById('target-bones-list') as HTMLDivElement
     this.clear_mappings_button = document.getElementById('clear-mappings-button') as HTMLButtonElement
     this.auto_map_button = document.getElementById('auto-map-button') as HTMLButtonElement
+    this.view_bone_tree_button = document.getElementById('view-bone-tree-button') as HTMLButtonElement
 
     // if we get a match, show what type of match we got on the UI for feedback
     this.auto_bone_map_match_display = document.getElementById('auto-bone-map-match') as HTMLSpanElement
@@ -49,6 +52,7 @@ export class StepBoneMapping extends EventTarget {
     this.update_bone_lists()
     this.update_clear_button_visibility()
     this.update_auto_map_button_visibility()
+    this.update_view_bone_tree_button_visibility()
   }
 
   private add_event_listeners (): void {
@@ -64,6 +68,10 @@ export class StepBoneMapping extends EventTarget {
         this.auto_map_bones()
       })
 
+      this.view_bone_tree_button?.addEventListener('click', () => {
+        this.show_target_bone_tree_dialog()
+      })
+
       this.has_added_event_listeners = true
     }
   }
@@ -76,6 +84,7 @@ export class StepBoneMapping extends EventTarget {
   public target_armature_updated (): void {
     this.update_target_bones_list()
     this.update_auto_map_button_visibility()
+    this.update_view_bone_tree_button_visibility()
   }
 
   public has_source_skeleton (): boolean {
@@ -202,13 +211,12 @@ export class StepBoneMapping extends EventTarget {
     }
 
     this.target_bones_list.innerHTML = ''
+    const bone_mappings: Map<string, string> = AnimationRetargetService.getInstance().get_bone_mappings()
     target_bone_names.forEach((name) => {
       const bone_item = document.createElement('div')
       bone_item.className = 'bone-item bone-item-target'
       bone_item.dataset.targetBoneName = name
 
-      // Check if this target bone has a mapping
-      const bone_mappings: Map<string, string> = AnimationRetargetService.getInstance().get_bone_mappings()
       const mapped_source_bone = bone_mappings.get(name)
       if (mapped_source_bone !== undefined) {
         const source_name_span = document.createElement('span')
@@ -221,7 +229,6 @@ export class StepBoneMapping extends EventTarget {
         bone_item.appendChild(source_name_span)
         bone_item.appendChild(target_name_span)
 
-        // Add remove button for the mapping
         const remove_button = document.createElement('button')
         remove_button.textContent = '✕'
         remove_button.className = 'remove-mapping-button secondary-button'
@@ -235,7 +242,6 @@ export class StepBoneMapping extends EventTarget {
         bone_item.textContent = name
       }
 
-      // Make the bone a drop target (target bones from uploaded mesh)
       bone_item.addEventListener('dragover', this.handle_drag_over.bind(this))
       bone_item.addEventListener('dragleave', this.handle_drag_leave.bind(this))
       bone_item.addEventListener('drop', this.handle_drop.bind(this))
@@ -244,9 +250,83 @@ export class StepBoneMapping extends EventTarget {
     })
   }
 
+  private get_unique_target_bones (): Map<string, Bone> {
+    const unique_bones: Map<string, Bone> = new Map<string, Bone>()
+
+    AnimationRetargetService.getInstance().get_target_skinned_meshes().forEach((skinned_mesh) => {
+      skinned_mesh.skeleton.bones.forEach((bone) => {
+        unique_bones.set(bone.uuid, bone)
+      })
+    })
+
+    return unique_bones
+  }
+
+  private get_target_root_bones (unique_target_bones: Map<string, Bone>): Bone[] {
+    const roots: Bone[] = []
+
+    unique_target_bones.forEach((bone) => {
+      const parent = bone.parent
+      const has_bone_parent_in_target = parent !== null && parent.type === 'Bone' && unique_target_bones.has(parent.uuid)
+
+      if (!has_bone_parent_in_target) {
+        roots.push(bone)
+      }
+    })
+
+    return roots.sort((a, b) => a.name.localeCompare(b.name))
+  }
+
+  private show_target_bone_tree_dialog (): void {
+    const unique_target_bones = this.get_unique_target_bones()
+    const root_target_bones = this.get_target_root_bones(unique_target_bones)
+
+    if (unique_target_bones.size === 0) {
+      new ModalDialog('Target Skeleton Hierarchy', '<p>No target skeleton loaded.</p>', { customClass: 'bone-tree-modal' }).show()
+      return
+    }
+
+    const tree_html = root_target_bones
+      .map((root_bone) => this.create_target_bone_tree_html(root_bone, unique_target_bones))
+      .join('')
+
+    const content_html = `
+      <div class="bone-tree-dialog-summary">
+        <span>Total bones: ${unique_target_bones.size}</span>
+        <span>Root chains: ${root_target_bones.length}</span>
+      </div>
+      <ul class="bone-tree-dialog-list">
+        ${tree_html}
+      </ul>
+    `
+
+    new ModalDialog('Target Skeleton Hierarchy', content_html, { customClass: 'bone-tree-modal' }).show()
+  }
+
+  private create_target_bone_tree_html (bone: Bone, unique_target_bones: Map<string, Bone>): string {
+    const child_bones = bone.children
+      .filter((child): child is Bone => child.type === 'Bone' && unique_target_bones.has(child.uuid))
+      .sort((a, b) => a.name.localeCompare(b.name))
+
+    const children_html = child_bones.length > 0
+      ? `<ul>${child_bones.map((child_bone) => this.create_target_bone_tree_html(child_bone, unique_target_bones)).join('')}</ul>`
+      : ''
+
+    return `<li><span class="bone-tree-node-name">${this.escape_html(bone.name)}</span>${children_html}</li>`
+  }
+
+  private escape_html (value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+  }
+
   // Drag and drop event handlers
   private handle_drag_start (event: DragEvent): void {
-    const target = event.target as HTMLElement
+    const target = event.currentTarget as HTMLElement
     const bone_name = target.dataset.boneName
 
     if (bone_name !== undefined && event.dataTransfer !== null) {
@@ -257,13 +337,13 @@ export class StepBoneMapping extends EventTarget {
   }
 
   private handle_drag_end (event: DragEvent): void {
-    const target = event.target as HTMLElement
+    const target = event.currentTarget as HTMLElement
     target.classList.remove('dragging')
   }
 
   private handle_drag_over (event: DragEvent): void {
     event.preventDefault() // Allow drop
-    const target = event.target as HTMLElement
+    const target = event.currentTarget as HTMLElement
 
     // Visual feedback for drop zone
     if (event.dataTransfer !== null) {
@@ -273,13 +353,13 @@ export class StepBoneMapping extends EventTarget {
   }
 
   private handle_drag_leave (event: DragEvent): void {
-    const target = event.target as HTMLElement
+    const target = event.currentTarget as HTMLElement
     target.classList.remove('drag-over')
   }
 
   private handle_drop (event: DragEvent): void {
     event.preventDefault()
-    const target = event.target as HTMLElement
+    const target = event.currentTarget as HTMLElement
     target.classList.remove('drag-over')
 
     if (event.dataTransfer !== null) {
@@ -336,6 +416,11 @@ export class StepBoneMapping extends EventTarget {
   private update_auto_map_button_visibility (): void {
     if (this.auto_map_button === null) return
     this.auto_map_button.style.display = this.has_both_skeletons() ? 'block' : 'none'
+  }
+
+  private update_view_bone_tree_button_visibility (): void {
+    if (this.view_bone_tree_button === null) return
+    this.view_bone_tree_button.style.display = this.has_target_skeleton() ? 'inline-flex' : 'none'
   }
 
   // Clear a specific mapping
