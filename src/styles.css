@@ -148,14 +148,6 @@ div, p {
     row-gap: 1rem;
 }
 
-#animation-filter {
-    width: 95%;
-    padding: 0.5rem;
-    background-color: var(--bg-primary);
-    border: none;
-    border-radius: 4px;
-    margin-bottom: 0.5rem;
-}
 #animation-listing-count {
     position: absolute;
     right: 3rem;
@@ -212,10 +204,22 @@ input[type="number"] {
 }
 
 input[type="text"] {
+    width: 95%;
+    padding: 0.5rem;
+    background-color: var(--bg-primary);
+    border: none;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
     background-color: var(--bg-primary);
     border: 1px solid var(--text-primary);
     color: var(--text-primary);
 }
+input[type="text"]::placeholder {
+    color: var(--text-primary);
+    opacity: 1; /* Firefox needs this to ensure full opacity */
+    font-style: italic;;
+}
+
 
 /* used for animation play options */
 button.secondary-button {
@@ -567,12 +571,6 @@ input[type="file"] {
     padding: 1rem;
 }
 
-/* Style for animation filter placeholder text */
-#animation-filter::placeholder {
-    color: var(--text-primary);
-    opacity: 1; /* Firefox needs this to ensure full opacity */
-    font-style: italic;;
-}
 
 /* Theme toggle button styles */
 #theme-toggle {

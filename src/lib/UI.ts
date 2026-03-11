@@ -90,6 +90,10 @@ export class UI {
   dom_animation_count: HTMLElement | null = null
   dom_animations_listing_count: HTMLElement | null = null
 
+  // retarget bone map filters
+  dom_source_bones_filter: HTMLInputElement | null = null
+  dom_target_bones_filter: HTMLInputElement | null = null
+
   dom_build_version: HTMLElement | null = null
   dom_attribution_link: HTMLAnchorElement | null = null
   dom_learn_link: HTMLAnchorElement | null = null
@@ -209,6 +213,10 @@ export class UI {
     this.dom_export_button_hidden_link = document.querySelector('#download-hidden-link')
     this.dom_animation_count = document.querySelector('#animation-selection-count')
     this.dom_animations_listing_count = document.querySelector('#animation-listing-count')
+
+    // retarget bone map filter controls
+    this.dom_source_bones_filter = document.querySelector('#source-bones-filter')
+    this.dom_target_bones_filter = document.querySelector('#target-bones-filter')
   }
 
   public hide_all_elements (): void {
