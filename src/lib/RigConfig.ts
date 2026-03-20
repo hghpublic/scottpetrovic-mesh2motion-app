@@ -121,10 +121,31 @@ export class RigConfig {
    */
   static populate_model_select (select: HTMLSelectElement): void {
     select.innerHTML = ''
-    for (const rig of this.all) {
+
+    // also import some custom models that are not the default models for a rig like an A-pose version of human
+    const custom_models = [
+      {
+        model_file: 'test-files/bone-correction-tests/human-a-pose.glb',
+        display_name: 'Human (A-Pose)'
+      }
+    ]
+
+    // combine all the rigs with the custom models needed
+    const model_options = [
+      ...this.all.map((rig) => {
+        return {
+          model_file: rig.model_file,
+          display_name: rig.rig_display_name
+        }
+      }),
+      ...custom_models
+    ]
+
+    // build out HTML options
+    for (const custom of model_options) {
       const option = document.createElement('option')
-      option.value = rig.model_file
-      option.textContent = rig.rig_display_name
+      option.value = custom.model_file
+      option.textContent = custom.display_name
       select.appendChild(option)
     }
   }
