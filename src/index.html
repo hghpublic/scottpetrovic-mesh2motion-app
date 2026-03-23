@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="./radio-button-group.css" crossorigin="anonymous" />
     <link rel="stylesheet" href="./animation-player.css" crossorigin="anonymous" />
     <link rel="stylesheet" href="./dialog.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="./settings-dropdown.css" crossorigin="anonymous" />
     <link rel="stylesheet" href="./marketing/marketing.css" crossorigin="anonymous" />
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
@@ -41,6 +42,25 @@
                 <!-- icon will fill in here-->
                 <span class="theme-icon"></span>
             </button>
+
+            <!-- Settings Toggle Dropdown -->
+            <div id="settings-dropdown-container" class="nav-dropdown">
+                <button id="settings-toggle" class="nav-icon-button" aria-expanded="false" aria-controls="settings-dropdown-content" aria-haspopup="true" aria-label="Open settings">
+                    <span class="material-symbols-outlined">tune</span>
+                </button>
+
+                <div id="settings-dropdown-content" class="nav-dropdown-content" hidden>
+                    <div class="settings-dropdown-row">
+                        <label for="setting-snap-toggle">Snap controls</label>
+                        <input type="checkbox" id="setting-snap-toggle" />
+                    </div>
+
+                    <div class="settings-dropdown-row settings-dropdown-slider-row">
+                        <label for="setting-interaction-speed">Interaction speed</label>
+                        <input type="range" id="setting-interaction-speed" min="1" max="100" value="50" />
+                    </div>
+                </div>
+            </div>
         </div>
     </nav>
 

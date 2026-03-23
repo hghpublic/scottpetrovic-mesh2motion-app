@@ -32,6 +32,7 @@ import { ModelPreviewDisplay } from './lib/enums/ModelPreviewDisplay.ts'
 import { TransformControlType } from './lib/enums/TransformControlType.ts'
 import { TransformSpace } from './lib/enums/TransformSpace.ts'
 import { ThemeManager } from './lib/ThemeManager.ts'
+import { SettingsDropdownManager } from './lib/SettingsDropdownManager.ts'
 import { ModalDialog } from './lib/ModalDialog.ts'
 import { ModelCleanupUtility } from './lib/processes/load-model/ModelCleanupUtility.ts'
 import { SceneEnvironmentManager } from './lib/SceneEnvironmentManager.ts'
@@ -51,6 +52,7 @@ export class Mesh2MotionEngine {
   // has UI elements on the HTML page that we will reference/use
   public scene: Scene
   public theme_manager: ThemeManager
+  public settings_dropdown_manager: SettingsDropdownManager
   public ui: UI
   public load_model_step: StepLoadModel
   public load_skeleton_step: StepLoadSkeleton
@@ -82,6 +84,7 @@ export class Mesh2MotionEngine {
     this.scene = new Scene()
     this.theme_manager = new ThemeManager()
     this.ui = UI.getInstance()
+    this.settings_dropdown_manager = new SettingsDropdownManager()
 
     // setting up steps
     this.load_model_step = new StepLoadModel()
