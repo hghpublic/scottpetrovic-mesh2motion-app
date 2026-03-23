@@ -103,6 +103,7 @@ export class UI {
   dom_settings_toggle_button: HTMLButtonElement | null = null
   dom_settings_dropdown_container: HTMLElement | null = null
   dom_settings_dropdown_content: HTMLElement | null = null
+  dom_light_intensity_input: HTMLInputElement | null = null
 
   private constructor () {
     this.initialize_dom_elements()
@@ -220,6 +221,7 @@ export class UI {
     this.dom_settings_toggle_button = document.querySelector('#settings-toggle')
     this.dom_settings_dropdown_container = document.querySelector('#settings-dropdown-container')
     this.dom_settings_dropdown_content = document.querySelector('#settings-dropdown-content')
+    this.dom_light_intensity_input = document.querySelector('#light-intensity-input')
 
     // UI for exporting the animation
     this.dom_export_button_hidden_link = document.querySelector('#download-hidden-link')

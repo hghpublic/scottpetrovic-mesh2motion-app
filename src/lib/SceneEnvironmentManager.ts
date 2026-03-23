@@ -11,6 +11,7 @@ import { type MeshDragBonePlacement } from './processes/edit-skeleton/MeshDragBo
 export class SceneEnvironmentManager {
   private readonly fog_near: number = 20
   private readonly fog_far: number = 80
+  private light_intensity_multiplier: number = 1.0
 
   private controls: OrbitControls | undefined = undefined
   private view_helper: CustomViewHelper | undefined = undefined
@@ -105,6 +106,19 @@ export class SceneEnvironmentManager {
     }
   }
 
+  public set_light_intensity_multiplier (multiplier: number): void {
+    if (!Number.isFinite(multiplier) || multiplier <= 0) {
+      return
+    }
+
+    this.light_intensity_multiplier = multiplier
+    this.regenerate_floor_grid()
+  }
+
+  public get_light_intensity_multiplier (): number {
+    return this.light_intensity_multiplier
+  }
+
   public regenerate_floor_grid (): void {
     // remove previous setup objects from scene if they exist
     const setup_container = this.scene.getObjectByName('Setup objects')
@@ -113,12 +127,13 @@ export class SceneEnvironmentManager {
     }
 
     const { grid_color, floor_color, light_strength } = this.get_environment_colors()
+    const adjusted_light_strength = light_strength * this.light_intensity_multiplier
 
     this.apply_scene_fog()
 
     this.environment_container = new Group()
     this.environment_container.name = 'Setup objects'
-    this.environment_container.add(...Generators.create_default_lights(light_strength))
+    this.environment_container.add(...Generators.create_default_lights(adjusted_light_strength))
 
     const floor_helpers = Generators.create_grid_helper(grid_color, floor_color) as THREE.Object3D[]
     floor_helpers.forEach((floor_helper) => {

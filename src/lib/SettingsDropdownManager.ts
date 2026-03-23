@@ -1,11 +1,14 @@
 import { UI } from './UI'
+import { type SceneEnvironmentManager } from './SceneEnvironmentManager'
 
 export class SettingsDropdownManager {
   private readonly ui: UI = UI.getInstance()
   private initialized: boolean = false
   private is_open: boolean = false
+  private readonly scene_environment?: SceneEnvironmentManager
 
-  constructor () {
+  constructor (scene_environment?: SceneEnvironmentManager) {
+    this.scene_environment = scene_environment
     this.initialize()
   }
 
@@ -49,6 +52,30 @@ export class SettingsDropdownManager {
       if (event.key === 'Escape') {
         this.close_dropdown()
       }
+    })
+
+    this.initialize_light_intensity_setting()
+  }
+
+  private initialize_light_intensity_setting (): void {
+    if (this.scene_environment === undefined) {
+      return
+    }
+
+    const light_intensity_input = this.ui.dom_light_intensity_input
+    if (light_intensity_input === null) {
+      return
+    }
+
+    light_intensity_input.value = this.scene_environment.get_light_intensity_multiplier().toFixed(2)
+
+    light_intensity_input.addEventListener('input', () => {
+      const slider_value = Number(light_intensity_input.value)
+      if (!Number.isFinite(slider_value)) {
+        return
+      }
+
+      this.scene_environment?.set_light_intensity_multiplier(slider_value)
     })
   }
 

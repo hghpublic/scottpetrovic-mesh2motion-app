@@ -52,7 +52,7 @@ export class Mesh2MotionEngine {
   // has UI elements on the HTML page that we will reference/use
   public scene: Scene
   public theme_manager: ThemeManager
-  public settings_dropdown_manager: SettingsDropdownManager
+  public settings_dropdown_manager: SettingsDropdownManager | undefined
   public ui: UI
   public load_model_step: StepLoadModel
   public load_skeleton_step: StepLoadSkeleton
@@ -84,7 +84,7 @@ export class Mesh2MotionEngine {
     this.scene = new Scene()
     this.theme_manager = new ThemeManager()
     this.ui = UI.getInstance()
-    this.settings_dropdown_manager = new SettingsDropdownManager()
+    this.settings_dropdown_manager = undefined
 
     // setting up steps
     this.load_model_step = new StepLoadModel()
@@ -109,6 +109,8 @@ export class Mesh2MotionEngine {
       this.theme_manager,
       this.mesh_drag_bone_placement
     )
+
+    this.settings_dropdown_manager = new SettingsDropdownManager(this.scene_environment)
 
     this.setup_environment()
     this.eventListeners.addEventListeners()
