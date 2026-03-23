@@ -1,7 +1,7 @@
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
-import { CustomViewHelper } from './lib/CustomViewHelper.ts'
+import type { CustomViewHelper } from './lib/CustomViewHelper.ts'
 
 import tippy from 'tippy.js'
 import './environment.js'
@@ -35,6 +35,7 @@ import { TransformSpace } from './lib/enums/TransformSpace.ts'
 import { ThemeManager } from './lib/ThemeManager.ts'
 import { ModalDialog } from './lib/ModalDialog.ts'
 import { ModelCleanupUtility } from './lib/processes/load-model/ModelCleanupUtility.ts'
+import { SceneEnvironmentManager } from './lib/SceneEnvironmentManager.ts'
 
 export class Mesh2MotionEngine {
   public readonly camera = Generators.create_camera()
@@ -72,10 +73,7 @@ export class Mesh2MotionEngine {
   public transform_space_type: TransformSpace = TransformSpace.Global
 
   private readonly clock = new THREE.Clock()
-  private readonly fog_near: number = 20
-  private readonly fog_far: number = 80
-
-  private environment_container: Group = new Group()
+  private readonly scene_environment: SceneEnvironmentManager
   private readonly eventListeners: EventListeners
 
   constructor () {
@@ -100,6 +98,15 @@ export class Mesh2MotionEngine {
       this.load_model_step,
       this.weight_skin_step,
       this.transform_controls_hover_distance
+    )
+
+    this.scene_environment = new SceneEnvironmentManager(
+      this.scene,
+      this.renderer,
+      this.camera,
+      this.transform_controls,
+      this.theme_manager,
+      this.mesh_drag_bone_placement
     )
 
     this.setup_environment()
@@ -138,16 +145,11 @@ export class Mesh2MotionEngine {
   }
 
   public set_camera_position (position: Vector3): void {
-    this.camera.position.copy(position)
-    this.controls?.update()
+    this.scene_environment.set_camera_position(position)
   }
 
   public set_zoom_limits (min_distance: number, max_distance: number): void {
-    if (this.controls !== undefined) {
-      this.controls.minDistance = min_distance
-      this.controls.maxDistance = max_distance
-      this.controls.update()
-    }
+    this.scene_environment.set_zoom_limits(min_distance, max_distance)
   }
 
   public set_custom_skeleton_helper_enabled (enabled: boolean): void {
@@ -155,92 +157,17 @@ export class Mesh2MotionEngine {
   }
 
   public set_fog_enabled (enabled: boolean): void {
-    if (enabled) {
-      this.apply_scene_fog()
-    } else {
-      this.scene.fog = null
-    }
-  }
-
-  private get_environment_colors (): { grid_color: number, floor_color: number, light_strength: number } {
-    if (this.theme_manager.get_current_theme() === 'light') {
-      return {
-        grid_color: 0xcccccc,
-        floor_color: 0xecf0f1,
-        light_strength: 14
-      }
-    }
-
-    return {
-      grid_color: 0x4f6f6f,
-      floor_color: 0x2d4353,
-      light_strength: 10
-    }
-  }
-
-  private apply_scene_fog (): void {
-    const { floor_color } = this.get_environment_colors()
-    this.scene.fog = new THREE.Fog(floor_color, this.fog_near, this.fog_far)
+    this.scene_environment.set_fog_enabled(enabled)
   }
 
   private setup_environment (): void {
-    this.renderer.setSize(window.innerWidth, window.innerHeight)
-    this.renderer.shadowMap.enabled = true
-
-    // Set Filmic tone mapping for less saturated, more cinematic look
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping // a bit softer of a look
-    this.renderer.toneMappingExposure = 2.0 // tweak this value for brightness
-
-    //  renderer should automatically clear its output before rendering a frame
-    // This was added/needed when the view helper was implemented.
-    this.renderer.autoClear = false
-
-    // Set default camera position for front view
-    // this will help because we first want the user to rotate the model to face the front
-    this.camera.position.set(0, 1.7, 15) // X:0 (centered), Y:1.7 (eye-level), Z:5 (front view)
-
-    Generators.create_window_resize_listener(this.renderer, this.camera)
-    document.body.appendChild(this.renderer.domElement)
-
-    // center orbit controls around mid-section area with target change
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-    this.controls.target.set(0, 0.9, 0)
-
-    // Set zoom limits to prevent excessive zooming in or out
-    this.controls.minDistance = 0.5 // Minimum zoom (closest to model)
-    this.controls.maxDistance = 30 // Maximum zoom (farthest from model)
-
-    this.controls.update()
-    this.mesh_drag_bone_placement.set_orbit_controls(this.controls)
-
-    this.view_helper = new CustomViewHelper(this.camera, document.getElementById('view-control-hitbox'))
-    this.view_helper.set_labels('X', 'Y', 'Z')
-
-    this.scene.add(this.transform_controls.getHelper())
-
-    // make transform control axis a bit smaller so they don't interfere with other points
-    this.transform_controls.size = 1.0
-
-    // basic things in another group, to better isolate what we are working on
-    this.regenerate_floor_grid()
+    this.scene_environment.setup_environment()
+    this.controls = this.scene_environment.get_controls()
+    this.view_helper = this.scene_environment.get_view_helper()
   } // end setup_environment()
 
   public regenerate_floor_grid (): void {
-    // remove previous setup objects from scene if they exist
-    const setup_container = this.scene.getObjectByName('Setup objects')
-    if (setup_container !== null) {
-      this.scene.remove(setup_container)
-    }
-
-    const { grid_color, floor_color, light_strength } = this.get_environment_colors()
-
-    this.apply_scene_fog()
-
-    this.environment_container = new Group()
-    this.environment_container.name = 'Setup objects'
-    this.environment_container.add(...Generators.create_default_lights(light_strength))
-    this.environment_container.add(...Generators.create_grid_helper(grid_color, floor_color))
-    this.scene.add(this.environment_container)
+    this.scene_environment.regenerate_floor_grid()
   }
 
   public regenerate_skeleton_helper (new_skeleton: Skeleton, helper_name = 'Skeleton Helper'): void {
