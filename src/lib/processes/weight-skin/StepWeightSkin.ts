@@ -3,8 +3,7 @@ import SkinningAlgorithm from '../../solvers/SkinningAlgorithm.ts'
 
 import { Generators } from '../../Generators.ts'
 
-import { type BufferGeometry, type Material, type Object3D, type Skeleton, SkinnedMesh, type Scene, Group, Uint16BufferAttribute, Float32BufferAttribute } from 'three'
-import BoneTesterData from '../../interfaces/BoneTesterData.ts'
+import { type BufferGeometry, type Material, type Object3D, type Skeleton, SkinnedMesh, Group, Uint16BufferAttribute, Float32BufferAttribute } from 'three'
 import { type SkeletonType } from '../../enums/SkeletonType.ts'
 
 // Note: EventTarget is a built-ininterface and do not need to import it
@@ -22,11 +21,6 @@ export class StepWeightSkin extends EventTarget {
   // weight painted mesh actually has multiple meshes that will go in a group
   private readonly weight_painted_mesh_preview: Group = new Group()
 
-  // debug options for bone skinning formula
-  private show_debug: boolean = false
-  private debug_scene_object: Object3D | undefined
-  private bone_index_to_test: number = -1
-
   constructor () {
     super()
     this.weight_painted_mesh_preview.name = 'Weight Painted Mesh Preview'
@@ -37,14 +31,11 @@ export class StepWeightSkin extends EventTarget {
 
   public begin (): void { }
 
-  public create_bone_formula_object (editable_armature: Object3D, skeleton_type: SkeletonType): SkinningAlgorithm | null {
+  public create_bone_formula_object (editable_armature: Object3D, skeleton_type: SkeletonType): void {
     this.skinning_armature = editable_armature.clone()
     this.skinning_armature.name = 'Armature for skinning'
 
-    // we only use one skinning formula for now
     this.bone_skinning_formula = new SkinningAlgorithm(this.skinning_armature.children[0], skeleton_type)
-
-    return this.bone_skinning_formula ?? null
   }
 
   public skeleton (): Skeleton | undefined {
@@ -124,18 +115,16 @@ export class StepWeightSkin extends EventTarget {
     this.all_mesh_materials.push(material)
   }
 
-  public create_skinned_mesh (geometry: BufferGeometry, material: Material, idx: number): SkinnedMesh {
+  private create_skinned_mesh (geometry: BufferGeometry, material: Material, idx: number): SkinnedMesh {
     if (this.binding_skeleton === undefined) {
-      console.warn('Tried to create_skinned_mesh() but binding_skeleton is undefined!')
-      return
+      throw new Error('binding_skeleton must be initialized before creating skinned meshes. Call create_binding_skeleton() first.')
     }
 
-    // create skinned mesh
     const skinned_mesh: SkinnedMesh = new SkinnedMesh(geometry, material)
     skinned_mesh.name = 'Skinned Mesh ' + idx.toString()
     skinned_mesh.castShadow = true // skinned mesh won't update right if this is false
 
-    // do the binding for the mesh to the skelleton
+    // do the binding for the mesh to the skeleton
     skinned_mesh.add(this.binding_skeleton.bones[0])
     skinned_mesh.bind(this.binding_skeleton)
 
@@ -150,39 +139,20 @@ export class StepWeightSkin extends EventTarget {
     return this.weight_painted_mesh_preview
   }
 
-  public set_show_debug (value: boolean): void {
-    this.show_debug = value
-  }
-
-  public set_debug_scene_object (scene: Scene): void {
-    this.debug_scene_object = scene
-  }
-
-  public set_bone_index_to_test (index: number): void {
-    this.bone_index_to_test = index
-  }
-
   /**
    * Configure head weight correction settings for the solver
    * @param enabled Whether head weight correction is enabled
    * @param height The preview plane height threshold
    */
   public set_head_weight_correction_settings (enabled: boolean, height: number): void {
-    // Only apply to the SkinningAlgorithm solver
-    if (this.bone_skinning_formula instanceof SkinningAlgorithm) {
-      this.bone_skinning_formula.set_head_weight_correction_enabled(enabled)
-      this.bone_skinning_formula.set_preview_plane_height(height)
-    }
+    if (this.bone_skinning_formula === undefined) return
+    this.bone_skinning_formula.set_head_weight_correction_enabled(enabled)
+    this.bone_skinning_formula.set_preview_plane_height(height)
   }
 
   public calculate_weights (): number[][] {
-    if (this.bone_skinning_formula === undefined) {
-      console.warn('Tried to calculate_weights() but bone_skinning_formula is null for some reason!')
-      return [[], []]
-    }
-
-    const indices_and_weights: number[][] = this.bone_skinning_formula.calculate_indexes_and_weights()
-    return indices_and_weights
+    if (this.bone_skinning_formula === undefined) return [[], []]
+    return this.bone_skinning_formula.calculate_indexes_and_weights()
   }
 
   public calculate_weights_for_all_mesh_data (regenerate_weight_painted_mesh: boolean = false): void {
@@ -191,14 +161,11 @@ export class StepWeightSkin extends EventTarget {
       return
     }
 
-    if (this.bone_skinning_formula === undefined) {
-      console.warn('Tried to calculate_weights_for_all_mesh_data() but bone_skinning_formula is null for some reason!')
-      return
-    }
+    if (this.bone_skinning_formula === undefined) return
 
     // loop through each mesh geometry and calculate the weights
     this.all_mesh_geometry.forEach((geometry_data: BufferGeometry, idx: number) => {
-      this.bone_skinning_formula?.set_geometry(geometry_data)
+      this.bone_skinning_formula!.set_geometry(geometry_data)
       const [final_skin_indices, final_skin_weights]: number[][] = this.calculate_weights()
 
       geometry_data.setAttribute('skinIndex', new Uint16BufferAttribute(final_skin_indices, 4))
