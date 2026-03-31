@@ -46,12 +46,14 @@ export class AnimationUtility {
         rotation_tracks = animation_clip.tracks
           .filter((x: KeyframeTrack) => x.name.includes('quaternion') ||
           x.name.toLowerCase().includes('hips.position') ||
+          x.name.toLowerCase().includes('head.position') ||
           x.name.toLowerCase().includes('pelvis.position') ||
           x.name.toLowerCase().includes('root.position'))
       } else {
         rotation_tracks = animation_clip.tracks
           .filter((x: KeyframeTrack) => x.name.includes('quaternion') ||
           x.name.toLowerCase().includes('hips.position') ||
+          x.name.toLowerCase().includes('head.position') ||
           x.name.toLowerCase().includes('pelvis.position'))
       }
 

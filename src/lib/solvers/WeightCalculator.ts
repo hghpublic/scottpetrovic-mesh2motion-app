@@ -103,13 +103,23 @@ export class WeightCalculator {
   // every vertex checks to see if it is below the hips area,
   // so do this calculation once and cache it for the lookup later
   private calculate_distance_to_bottom_of_hip (): number {
-    const hip_bone_object: Bone | undefined = this.bones.find(b => {
+    let hip_bone_object: Bone | undefined = this.bones.find(b => {
       const name = b.name.toLowerCase()
       return name.includes('hips') || name.includes('pelvis')
     })
     if (hip_bone_object === undefined) {
-      throw new Error('Hip bone not found')
+
+
+      // if there are no hips bones, we are going to assume it is a rig
+      // that doesnt' have hips like a snake. Let's check the head
+      // that will be used for the distance calculation instead and hope for the best
+      hip_bone_object = this.bones.find(b => b.name.toLowerCase().includes('head'))
+      if (hip_bone_object === undefined) { 
+        throw new Error('Hip bone (or head bone) not found')
+      }
+
     }
+    
     const intesection_point: Vector3 | null = this.cast_intersection_ray_down_from_bone(hip_bone_object)
 
     // get the distance from the bone point to the intersection point
