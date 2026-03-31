@@ -10,6 +10,9 @@ export interface RigConfigEntry {
   has_hand_options: boolean // Only Human has per-finger hand skeleton options
   has_head_weight_correction: boolean // Only Human shows the head weight correction panel
   has_arm_extension: boolean // Only Human shows the arm expand/contract slider
+  // The bone used for position tracking (e.g., 'hips' or 'head'). 
+  // we only have one bone per rig that we allow position keyframes (besides root)
+  position_tracking_bone_name: string 
 }
 
 /**
@@ -29,7 +32,8 @@ export class RigConfig {
       animation_preview_folder: 'human',
       has_hand_options: true,
       has_head_weight_correction: true,
-      has_arm_extension: true
+      has_arm_extension: true,
+      position_tracking_bone_name: 'pelvis',
     } satisfies RigConfigEntry,
     {
       skeleton_type: SkeletonType.Fox,
@@ -40,7 +44,8 @@ export class RigConfig {
       animation_preview_folder: 'fox',
       has_hand_options: false,
       has_head_weight_correction: false,
-      has_arm_extension: false
+      has_arm_extension: false,
+      position_tracking_bone_name: 'hips',
     } satisfies RigConfigEntry,
     {
       skeleton_type: SkeletonType.Bird,
@@ -51,7 +56,8 @@ export class RigConfig {
       animation_preview_folder: 'bird',
       has_hand_options: false,
       has_head_weight_correction: false,
-      has_arm_extension: false
+      has_arm_extension: false,
+      position_tracking_bone_name: 'hips',
     } satisfies RigConfigEntry,
     {
       skeleton_type: SkeletonType.Dragon,
@@ -62,7 +68,8 @@ export class RigConfig {
       animation_preview_folder: 'dragon',
       has_hand_options: false,
       has_head_weight_correction: false,
-      has_arm_extension: false
+      has_arm_extension: false,
+      position_tracking_bone_name: 'hips',
     } satisfies RigConfigEntry,
     {
       skeleton_type: SkeletonType.Kaiju,
@@ -73,7 +80,8 @@ export class RigConfig {
       animation_preview_folder: 'kaiju',
       has_hand_options: false,
       has_head_weight_correction: false,
-      has_arm_extension: false
+      has_arm_extension: false,
+      position_tracking_bone_name: 'hips',
     } satisfies RigConfigEntry,
     {
       skeleton_type: SkeletonType.Spider,
@@ -84,7 +92,8 @@ export class RigConfig {
       animation_preview_folder: 'spider',
       has_hand_options: false,
       has_head_weight_correction: false,
-      has_arm_extension: false
+      has_arm_extension: false,
+      position_tracking_bone_name: 'hips',
     } satisfies RigConfigEntry,
     {
       skeleton_type: SkeletonType.Snake,
@@ -95,7 +104,8 @@ export class RigConfig {
       animation_preview_folder: 'snake',
       has_hand_options: false,
       has_head_weight_correction: false,
-      has_arm_extension: false
+      has_arm_extension: false,
+      position_tracking_bone_name: 'head', // snake doesn't have hips, so we track position from the head instead
     } satisfies RigConfigEntry
   ]
 

@@ -10,6 +10,7 @@ import { Generators } from '../lib/Generators.ts'
 import { ThemeManager } from '../lib/ThemeManager.ts'
 import { AnimationUtility } from '../lib/processes/animations-listing/AnimationUtility.ts'
 import { RigConfig } from '../lib/RigConfig.ts'
+import { SkeletonType } from '../lib/enums/SkeletonType.ts'
 
 class PreviewGenerator {
   private readonly renderer_: THREE.WebGLRenderer
@@ -126,7 +127,7 @@ class PreviewGenerator {
         // TODO: with cleaning up data, the fox sitting has a weird height offset
         // I would think the cleanup should work with all skeleton types
         if (file_to_load.includes('human')) {
-          AnimationUtility.clean_track_data(this.animation_clips)
+          AnimationUtility.clean_track_data(this.animation_clips, SkeletonType.Human )
         }
 
         const clip = this.animation_clips[0]

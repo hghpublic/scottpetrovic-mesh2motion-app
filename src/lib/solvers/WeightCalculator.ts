@@ -6,6 +6,7 @@ import {
 
 import { Utility } from '../Utilities.js'
 import { SkeletonType } from '../enums/SkeletonType.js'
+import { RigConfig } from '../RigConfig.js'
 
 /**
  * Handles the core bone-to-vertex weight calculation logic.
@@ -19,7 +20,7 @@ export class WeightCalculator {
 
   private cached_median_child_bone_positions: Vector3[] = []
   private readonly bone_object_to_index = new Map<Bone, number>()
-  private distance_to_bottom_of_hip: number = 0
+  private distance_to_bottom_of_position_tracking_bone: number = 0
 
   // each index will be a bone index. the value will be a list of vertex indices that belong to that bone
   private readonly bones_vertex_segmentation: number[][] = []
@@ -37,7 +38,7 @@ export class WeightCalculator {
   public initialize_caches (): void {
     this.cached_median_child_bone_positions = this.bones.map(b => this.midpoint_to_child(b))
     this.bones.forEach((b, idx) => this.bone_object_to_index.set(b, idx))
-    this.distance_to_bottom_of_hip = this.calculate_distance_to_bottom_of_hip()
+    this.distance_to_bottom_of_position_tracking_bone = this.calculate_distance_to_bottom_of_position_tracking_bone()
   }
 
   public get_cached_median_child_bone_positions (): Vector3[] {
@@ -68,7 +69,7 @@ export class WeightCalculator {
           (bone.name.includes('hips') || bone.name.includes('pelvis'))) {
           // if the intersection point is lower than the vertex position, that means the vertex is below
           // the hips area, and is part of the left or right leg...ignore that result
-          if (this.distance_to_bottom_of_hip !== null && this.distance_to_bottom_of_hip < vertex_position.y) {
+          if (this.distance_to_bottom_of_position_tracking_bone !== null && this.distance_to_bottom_of_position_tracking_bone < vertex_position.y) {
             return// this vertex is below our crotch area, so it cannot be part of our hips
           }
         }
@@ -102,28 +103,23 @@ export class WeightCalculator {
 
   // every vertex checks to see if it is below the hips area,
   // so do this calculation once and cache it for the lookup later
-  private calculate_distance_to_bottom_of_hip (): number {
-    let hip_bone_object: Bone | undefined = this.bones.find(b => {
+  private calculate_distance_to_bottom_of_position_tracking_bone (): number {
+
+    const position_tracking_bone_name: string = RigConfig.by_skeleton_type(this.skeleton_type as SkeletonType)?.position_tracking_bone_name || 'UNKNOWN POSITION BONE'
+
+    let position_tracking_bone_object: Bone | undefined = this.bones.find(b => {
       const name = b.name.toLowerCase()
-      return name.includes('hips') || name.includes('pelvis')
+      return name.includes(position_tracking_bone_name.toLowerCase())
     })
-    if (hip_bone_object === undefined) {
 
-
-      // if there are no hips bones, we are going to assume it is a rig
-      // that doesnt' have hips like a snake. Let's check the head
-      // that will be used for the distance calculation instead and hope for the best
-      hip_bone_object = this.bones.find(b => b.name.toLowerCase().includes('head'))
-      if (hip_bone_object === undefined) { 
-        throw new Error('Hip bone (or head bone) not found')
-      }
-
+    if (position_tracking_bone_object === undefined) { 
+        throw new Error('Position tracking bone not found')
     }
-    
-    const intesection_point: Vector3 | null = this.cast_intersection_ray_down_from_bone(hip_bone_object)
+
+    const intesection_point: Vector3 | null = this.cast_intersection_ray_down_from_bone(position_tracking_bone_object)
 
     // get the distance from the bone point to the intersection point
-    const bone_index = this.bones.findIndex(b => b === hip_bone_object)
+    const bone_index = this.bones.findIndex(b => b === position_tracking_bone_object)
     const bone_position: Vector3 = this.cached_median_child_bone_positions[bone_index]
 
     let distance_to_bottom: number = intesection_point?.distanceTo(bone_position) ?? 0

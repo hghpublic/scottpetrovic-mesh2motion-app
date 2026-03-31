@@ -25,6 +25,8 @@ export class AnimationLoader extends EventTarget {
   private completed_files: number = 0
   private total_files: number = 0
 
+  private skeleton_type: SkeletonType | null = null
+
   private create_default_metadata (): AnimationClipMetadata {
     return {
       source_type: 'default-library',
@@ -49,11 +51,12 @@ export class AnimationLoader extends EventTarget {
     skeleton_type: SkeletonType,
     skeleton_scale: number = 1.0
   ): Promise<TransformedAnimationClipPair[]> {
-    const configured_animation_files = RigConfig.get_animation_file_paths(skeleton_type)
+    this.skeleton_type = skeleton_type
+    const configured_animation_files = RigConfig.get_animation_file_paths(this.skeleton_type)
     const file_paths = configured_animation_files.map(f => `${this.animations_file_path}${f}`)
 
     if (file_paths.length === 0) {
-      throw new Error(`No animation files found for skeleton type: ${skeleton_type}`)
+      throw new Error(`No animation files found for skeleton type: ${this.skeleton_type}`)
     }
 
     // Initialize progress tracking
@@ -231,7 +234,7 @@ export class AnimationLoader extends EventTarget {
     const cloned_animations = AnimationUtility.deep_clone_animation_clips(raw_animations)
 
     // Clean track data (remove position tracks except for specific cases)
-    AnimationUtility.clean_track_data(cloned_animations)
+    AnimationUtility.clean_track_data(cloned_animations, this.skeleton_type)
 
     // Apply skeleton scaling to position keyframes
     AnimationUtility.apply_skeleton_scale_to_position_keyframes(cloned_animations, skeleton_scale)
