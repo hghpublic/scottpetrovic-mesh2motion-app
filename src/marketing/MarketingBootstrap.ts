@@ -44,6 +44,8 @@ export class MarketingBootstrap {
       model_button.textContent = rig.rig_display_name
 
       model_button.addEventListener('click', () => {
+        // if we previously swapped a variation model into scene, clear it first
+        this.mesh2motion_engine.animations_listing_step.clear_variation_model_from_scene()
         this.mesh2motion_engine.load_model_step.clear_loaded_model_data()
         this.mesh2motion_engine.load_model_step.load_model_file('../' + rig.model_file, 'glb')
         this.skeleton_type = rig.skeleton_type
@@ -70,6 +72,9 @@ export class MarketingBootstrap {
       this.mesh2motion_engine.animations_listing_step.swap_skinned_meshes(
         this.mesh2motion_engine.scene, skinned_meshes, model_root
       )
+
+      this.rebuild_skeleton_helper(skinned_meshes)
+ 
     }) as EventListener)
 
     // event after the DOM is fully loaded for HTML elements
@@ -94,7 +99,24 @@ export class MarketingBootstrap {
       this.mesh2motion_engine.process_step_changed(ProcessStep.BindPose)
     })
   }
+
+  private rebuild_skeleton_helper (skinned_meshes: SkinnedMesh[]): void {
+     // rebuild helper to target the new skeleton for this variation
+      if (skinned_meshes.length > 0) {
+        this.mesh2motion_engine.regenerate_skeleton_helper(skinned_meshes[0].skeleton)
+        this.mesh2motion_engine.sync_skeleton_helper_joint_visibility()
+
+        // keep current helper visibility aligned with the toggle state
+        if (this.mesh2motion_engine.skeleton_helper !== undefined) {
+          const show_skeleton = this.mesh2motion_engine.ui.dom_show_skeleton_checkbox?.checked ?? false
+          this.mesh2motion_engine.skeleton_helper.visible = show_skeleton
+        }
+      }
+  }
+
 }
+
+
 
 // instantiate the class to setup event listeners
 const app = new MarketingBootstrap()

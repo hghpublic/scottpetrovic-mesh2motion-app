@@ -65,6 +65,18 @@ export class RigConfig {
       has_head_weight_correction: false,
       has_arm_extension: false,
       position_tracking_bone_name: 'hips',
+      model_variations: [
+        {
+          model_file: 'models-variation/fox-base.glb',
+          display_name: 'Fox',
+          attribution: 'None'
+        } satisfies ModelVariation,
+        {
+          model_file: 'models-variation/fox-horse.glb',
+          display_name: 'Horse',
+          attribution: 'None'
+        } satisfies ModelVariation
+      ]
     } satisfies RigConfigEntry,
     {
       skeleton_type: SkeletonType.Bird,

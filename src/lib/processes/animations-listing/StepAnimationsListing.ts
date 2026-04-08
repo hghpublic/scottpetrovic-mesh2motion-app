@@ -25,7 +25,7 @@ export class StepAnimationsListing extends EventTarget {
 
   private animation_mixer: AnimationMixer = new AnimationMixer(new Object3D())
   private skinned_meshes_to_animate: SkinnedMesh[] = []
-  private variation_model_root: Group | null = null
+  private variation_model_root: Group | null = null // stored auto-rig model that comes from GLB
   private current_playing_index: number = 0
   private skeleton_type: SkeletonType = SkeletonType.Human
 
@@ -166,10 +166,10 @@ export class StepAnimationsListing extends EventTarget {
    * and replays the current animation on them.
    */
   public swap_skinned_meshes (scene: Scene, new_skinned_meshes: SkinnedMesh[], model_root: Group): void {
-    // remove previous variation model root if one was added
-    if (this.variation_model_root !== null) {
-      Utility.remove_object_with_children(this.variation_model_root)
-    } else {
+    const had_variation_model = this.variation_model_root !== null
+    this.clear_variation_model_from_scene()
+
+    if (!had_variation_model) {
       // remove the original skinned meshes that were added individually
       for (const mesh of this.skinned_meshes_to_animate) {
         Utility.remove_object_with_children(mesh)
@@ -185,6 +185,17 @@ export class StepAnimationsListing extends EventTarget {
     // replay current animation on the new meshes
     this.play_animation(this.current_playing_index)
     this.animation_player.play()
+  }
+
+  /**
+   * Clears any variation model root that was injected during model variation swapping.
+   * This should be called before doing a full model load flow.
+   */
+  public clear_variation_model_from_scene (): void {
+    if (this.variation_model_root !== null) {
+      Utility.remove_object_with_children(this.variation_model_root)
+      this.variation_model_root = null
+    }
   }
 
   public load_and_apply_default_animation_to_skinned_mesh (final_skinned_meshes: SkinnedMesh[]): void {
