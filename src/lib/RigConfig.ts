@@ -13,6 +13,13 @@ export interface RigConfigEntry {
   // The bone used for position tracking (e.g., 'hips' or 'head'). 
   // we only have one bone per rig that we allow position keyframes (besides root)
   position_tracking_bone_name: string 
+  model_variations?: ModelVariation[] // similar models (human, zombie, etc)
+}
+
+export interface ModelVariation {
+  model_file: string // Model file path relative to the static root, e.g. 'models/model-human-a-pose.glb'
+  display_name: string // Display name shown in the model dropdown, e.g. 'Human (A-Pose)'
+  attribution: string // Free-form attribution text to be shown in the UI when this model variation is selected, e.g. 'Model by Artist Name'
 }
 
 /**
@@ -34,6 +41,18 @@ export class RigConfig {
       has_head_weight_correction: true,
       has_arm_extension: true,
       position_tracking_bone_name: 'pelvis',
+      model_variations: [
+        {
+          model_file: 'models-variation/human-base.glb',
+          display_name: 'Mannequin',
+          attribution: 'Model by Quaternius, CC0-licensed'
+        } satisfies ModelVariation,
+        {
+          model_file: 'models-variation/human-zombie.glb',
+          display_name: 'Zombie',
+          attribution: 'Model by Kenney.nl, CC0-licensed'
+        } satisfies ModelVariation
+      ]
     } satisfies RigConfigEntry,
     {
       skeleton_type: SkeletonType.Fox,
