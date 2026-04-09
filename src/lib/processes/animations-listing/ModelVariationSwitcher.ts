@@ -124,6 +124,8 @@ export class ModelVariationSwitcher extends EventTarget {
         const skinned_meshes: SkinnedMesh[] = []
         gltf.scene.traverse((child) => {
           if (child instanceof SkinnedMesh) {
+            child.castShadow = true
+            child.receiveShadow = true
             skinned_meshes.push(child)
           }
         })
