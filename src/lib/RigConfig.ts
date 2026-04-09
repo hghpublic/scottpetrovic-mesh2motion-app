@@ -79,13 +79,13 @@ export class RigConfig {
           model_file: 'models-variation/fox-base.glb',
           display_name: 'Fox',
           attribution: 'None',
-          preview_image: 'images/variations/fox-base.png'
+          preview_image: 'models-variation/fox-base.png'
         } satisfies ModelVariation,
         {
           model_file: 'models-variation/fox-horse.glb',
           display_name: 'Horse',
           attribution: 'None',
-          preview_image: 'images/variations/fox-base.png'
+          preview_image: 'models-variation/fox-base.png'
         } satisfies ModelVariation
       ]
     } satisfies RigConfigEntry,

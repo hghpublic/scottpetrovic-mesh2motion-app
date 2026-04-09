@@ -36,6 +36,7 @@ import { SettingsDropdownManager } from './lib/SettingsDropdownManager.ts'
 import { ModalDialog } from './lib/ModalDialog.ts'
 import { ModelCleanupUtility } from './lib/processes/load-model/ModelCleanupUtility.ts'
 import { SceneEnvironmentManager } from './lib/SceneEnvironmentManager.ts'
+import { CameraShake } from './lib/CameraShake.ts'
 
 export class Mesh2MotionEngine {
   public readonly camera = Generators.create_camera()
@@ -75,11 +76,13 @@ export class Mesh2MotionEngine {
   private readonly clock = new THREE.Clock()
   private readonly scene_environment: SceneEnvironmentManager
   private readonly eventListeners: EventListeners
+  private readonly camera_shake: CameraShake
 
   constructor () {
     this.eventListeners = new EventListeners(this)
     // helps resolve requestAnimationFrame calling animate() with wrong context
     this.animate = this.animate.bind(this)
+    this.camera_shake = new CameraShake(this.camera)
 
     this.scene = new Scene()
     this.theme_manager = new ThemeManager()
@@ -149,6 +152,11 @@ export class Mesh2MotionEngine {
 
   public set_camera_position (position: Vector3): void {
     this.scene_environment.set_camera_position(position)
+  }
+
+  /** Trigger a gentle camera shake transition effect. */
+  public shake_camera (intensity?: number, duration?: number): void {
+    this.camera_shake.start(intensity, duration)
   }
 
   public set_zoom_limits (min_distance: number, max_distance: number): void {
@@ -438,6 +446,9 @@ export class Mesh2MotionEngine {
   private animate (): void {
     requestAnimationFrame(this.animate)
     const delta_time: number = this.clock.getDelta()
+
+    // camera shake effect
+    this.camera_shake.update(delta_time)
 
     // if we are in the animation listing step, we can call
     // render/update functions in that

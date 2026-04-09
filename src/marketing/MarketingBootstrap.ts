@@ -84,6 +84,8 @@ export class MarketingBootstrap {
 
     // we are re-creating the engine, so need to manually add the event listeners again
     this.mesh2motion_engine.load_model_step.addEventListener('modelLoaded', () => {
+      this.mesh2motion_engine.shake_camera()
+
       // resolve the rig file path from the central config
       const rig_file = RigConfig.rig_file_for(this.skeleton_type)
       this.mesh2motion_engine.process_step_changed(ProcessStep.LoadSkeleton)

@@ -20,6 +20,7 @@
   border-radius: 5px;
   text-align: center;
   max-width: 80%;
+  box-shadow: 0 0 5rem #0b1d36;
   animation: modal-dialog-bounce-in 0.3s ease-out;
 }
 
@@ -135,6 +136,7 @@
   border-radius: 4px;
   background: var(--bg-primary);
   margin: 0;
+  filter: none !important; /* avoid inverting image like we do for icons in light mode */
 }
 
 .variation-name {

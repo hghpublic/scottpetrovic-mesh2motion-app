@@ -52,7 +52,7 @@
 }
 
 /* SVG inversion for light theme using body class */
-body.light-theme img[src$=".svg"] ,
+body.light-theme img[src$=".svg"],
 body.light-theme img[src$=".png"] {
   filter: invert(0.7);
 }
