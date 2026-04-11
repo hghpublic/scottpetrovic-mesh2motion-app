@@ -86,6 +86,12 @@ export class RigConfig {
           display_name: 'Horse',
           attribution: 'None',
           preview_image: 'models-variation/profiles/horse.png'
+        } satisfies ModelVariation,
+        {
+          model_file: 'models-variation/fox-cat.glb',
+          display_name: 'Cat (Carrot)',
+          attribution: 'David Revoy CC-BY',
+          preview_image: 'models-variation/profiles/cat.png'
         } satisfies ModelVariation
       ]
     } satisfies RigConfigEntry,
