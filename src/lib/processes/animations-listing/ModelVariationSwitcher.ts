@@ -1,7 +1,9 @@
 import { Skeleton, SkinnedMesh } from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import tippy from 'tippy.js'
 import { RigConfig, type ModelVariation, type RigConfigEntry } from '../../RigConfig'
 import { type SkeletonType } from '../../enums/SkeletonType'
+import { VariationLicenseCatalog } from '../../VariationLicenseInfo'
 
 /**
  * Manages the model variation selection on the Explore page.
@@ -87,6 +89,18 @@ export class ModelVariationSwitcher extends EventTarget {
       name_el.className = 'variation-name'
       name_el.textContent = variation.display_name
       card.appendChild(name_el)
+
+      const license_info = VariationLicenseCatalog.get_license_info(variation.license)
+      const license_chip = document.createElement('span')
+      license_chip.className = 'variation-license-chip'
+      license_chip.textContent = variation.license
+      card.appendChild(license_chip)
+
+      tippy(license_chip, {
+        content: `${variation.license}: ${license_info.description}`,
+        theme: 'mesh2motion',
+        placement: 'top'
+      })
 
       if (variation.attribution !== 'None') {
         const attribution_el = document.createElement('div')
