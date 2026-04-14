@@ -72,7 +72,14 @@ export class RigConfig {
           attribution: 'Blender Studio',
           license: 'CC-BY',
           preview_image: 'models-variation/profiles/jay.png'
-        } satisfies ModelVariation
+        } satisfies ModelVariation,
+        {
+          model_file: 'models-variation/human-sintel.glb',
+          display_name: 'Sintel',
+          attribution: 'Blender Studio',
+          license: 'CC-BY',
+          preview_image: 'models-variation/profiles/sintel.png'
+        } satisfies ModelVariation,
       ]
     } satisfies RigConfigEntry,
     {
