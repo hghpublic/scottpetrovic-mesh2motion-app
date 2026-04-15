@@ -135,6 +135,22 @@ export class RigConfig {
       has_head_weight_correction: false,
       has_arm_extension: false,
       position_tracking_bone_name: 'hips',
+      model_variations: [
+        {
+          model_file: 'models-variation/bird-base.glb',
+          display_name: 'Seagull',
+          attribution: '',
+          license: 'CC0',
+          preview_image: 'models-variation/profiles/seagull.png'
+        } satisfies ModelVariation,
+        {
+          model_file: 'models-variation/bird-eagle.glb',
+          display_name: 'Bald Eagle',
+          attribution: '',
+          license: 'CC0',
+          preview_image: 'models-variation/profiles/eagle.png'
+        } satisfies ModelVariation,
+      ]
     } satisfies RigConfigEntry,
     {
       skeleton_type: SkeletonType.Dragon,
