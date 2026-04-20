@@ -31,6 +31,12 @@ export class ModelVariationSwitcher extends EventTarget {
   private pending_variation: ModelVariation | null = null // active selection (will be reset if user cancels out of dialog)
 
 
+  // Loading progress bar elements within the dialog once confirmation happens. A few models are around 5MB which could take
+  // a moment to load.
+  private readonly dom_loading_container: HTMLElement | null = document.querySelector('#variation-loading-container')
+  private readonly dom_loading_bar: HTMLElement | null = document.querySelector('#variation-loading-bar')
+  private readonly dom_loading_text: HTMLElement | null = document.querySelector('#variation-loading-text')
+
   // UI elements on the explore page that show the currently selected variation's info. Used to populate current value.
   private readonly dom_switcher: HTMLElement | null = document.querySelector('#model-variation-switcher')
   private readonly dom_change_model_button: HTMLButtonElement | null = document.querySelector('#model-variation-button')
@@ -197,10 +203,35 @@ export class ModelVariationSwitcher extends EventTarget {
     this.dom_dialog_overlay.style.display = 'none'
   }
 
+  private show_loading_progress (): void {
+    if (this.dom_loading_container !== null) this.dom_loading_container.style.display = ''
+    if (this.dom_loading_bar !== null) this.dom_loading_bar.style.transform = 'scaleX(0)'
+    if (this.dom_loading_text !== null) this.dom_loading_text.textContent = 'Loading model…'
+  }
+
+  private hide_loading_progress (): void {
+    if (this.dom_loading_container !== null) this.dom_loading_container.style.display = 'none'
+    if (this.dom_loading_bar !== null) this.dom_loading_bar.style.transform = 'scaleX(0)'
+  }
+
+  private update_loading_progress (percent: number): void {
+    // the progress callback from the GLTF loader can fire frequently and the DOM never 'repaints' with the new values
+    // this forces the DOM to update the new progress bar values immediately.
+    requestAnimationFrame(() => {
+      if (this.dom_loading_bar !== null) this.dom_loading_bar.style.transform = `scaleX(${percent / 100})`
+      if (this.dom_loading_text !== null) this.dom_loading_text.textContent = `Loading model… ${Math.round(percent)}%`
+    })
+  }
+
   private load_variation_model (model_file: string): void {
+    this.show_loading_progress()
+
     this.loader.load(
       '../' + model_file,
       (gltf) => {
+        this.hide_loading_progress()
+        this.hide_dialog()
+
         const skinned_meshes: SkinnedMesh[] = []
         gltf.scene.traverse((child) => {
           if (child instanceof SkinnedMesh) {
@@ -216,9 +247,17 @@ export class ModelVariationSwitcher extends EventTarget {
           detail: { model_file, skinned_meshes }
         }))
       },
-      undefined,
-      (error) => {
+      (progress: ProgressEvent<EventTarget>) => {
+        if (progress.lengthComputable) {
+          const percent = (progress.loaded / progress.total) * 100
+          this.update_loading_progress(percent)
+        }
+      },
+      (error: unknown) => {
+        // this should never happen since we are only using application files
         console.error('Failed to load model variation:', model_file, error)
+        this.hide_loading_progress()
+        if (this.dom_dialog_confirm_button !== null) this.dom_dialog_confirm_button.disabled = false
       }
     )
   }
@@ -259,7 +298,7 @@ export class ModelVariationSwitcher extends EventTarget {
       if (this.pending_variation === null) return // this shouldn't happen, but leave for a safe guard
 
       this.confirmed_variation = this.pending_variation
-      this.hide_dialog()
+      if (this.dom_dialog_confirm_button !== null) this.dom_dialog_confirm_button.disabled = true
       this.update_active_model_info()
       this.load_variation_model(this.confirmed_variation.model_file)
     })
