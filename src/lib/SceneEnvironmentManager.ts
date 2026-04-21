@@ -12,6 +12,7 @@ export class SceneEnvironmentManager {
   private readonly fog_near: number = 20
   private readonly fog_far: number = 80
   private light_intensity_multiplier: number = 1.0
+  private floor_grid_visible: boolean = true
 
   private controls: OrbitControls | undefined = undefined
   private view_helper: CustomViewHelper | undefined = undefined
@@ -119,6 +120,11 @@ export class SceneEnvironmentManager {
     return this.light_intensity_multiplier
   }
 
+  public set_floor_grid_visible (visible: boolean): void {
+    this.floor_grid_visible = visible
+    this.regenerate_floor_grid()
+  }
+
   public regenerate_floor_grid (): void {
     // remove previous setup objects from scene if they exist
     const setup_container = this.scene.getObjectByName('Setup objects')
@@ -135,10 +141,12 @@ export class SceneEnvironmentManager {
     this.environment_container.name = 'Setup objects'
     this.environment_container.add(...Generators.create_default_lights(adjusted_light_strength))
 
-    const floor_helpers = Generators.create_grid_helper(grid_color, floor_color) as THREE.Object3D[]
-    floor_helpers.forEach((floor_helper) => {
-      this.environment_container.add(floor_helper)
-    })
+    if (this.floor_grid_visible) {
+      const floor_helpers = Generators.create_grid_helper(grid_color, floor_color) as THREE.Object3D[]
+      floor_helpers.forEach((floor_helper) => {
+        this.environment_container.add(floor_helper)
+      })
+    }
 
     this.scene.add(this.environment_container)
   }

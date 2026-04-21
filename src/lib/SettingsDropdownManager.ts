@@ -55,6 +55,38 @@ export class SettingsDropdownManager {
     })
 
     this.initialize_light_intensity_setting()
+    this.initialize_floor_grid_setting()
+    this.initialize_background_setting()
+  }
+
+  private initialize_floor_grid_setting (): void {
+    if (this.scene_environment === undefined) {
+      return
+    }
+
+    const floor_grid_toggle = this.ui.dom_floor_grid_toggle
+    if (floor_grid_toggle === null) {
+      return
+    }
+
+    floor_grid_toggle.addEventListener('change', () => {
+      this.scene_environment?.set_floor_grid_visible(floor_grid_toggle.checked)
+    })
+  }
+
+  private initialize_background_setting (): void {
+    const solid_background_toggle = this.ui.dom_solid_background_toggle
+    if (solid_background_toggle === null) {
+      return
+    }
+
+    solid_background_toggle.addEventListener('change', () => {
+      if (solid_background_toggle.checked) {
+        document.body.classList.add('solid-background')
+      } else {
+        document.body.classList.remove('solid-background')
+      }
+    })
   }
 
   private initialize_light_intensity_setting (): void {

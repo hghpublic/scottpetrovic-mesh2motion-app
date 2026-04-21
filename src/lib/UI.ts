@@ -104,6 +104,8 @@ export class UI {
   dom_settings_dropdown_container: HTMLElement | null = null
   dom_settings_dropdown_content: HTMLElement | null = null
   dom_light_intensity_input: HTMLInputElement | null = null
+  dom_floor_grid_toggle: HTMLInputElement | null = null
+  dom_solid_background_toggle: HTMLInputElement | null = null
 
   private constructor () {
     this.initialize_dom_elements()
@@ -222,6 +224,8 @@ export class UI {
     this.dom_settings_dropdown_container = document.querySelector('#settings-dropdown-container')
     this.dom_settings_dropdown_content = document.querySelector('#settings-dropdown-content')
     this.dom_light_intensity_input = document.querySelector('#light-intensity-input')
+    this.dom_floor_grid_toggle = document.querySelector('#floor-grid-toggle')
+    this.dom_solid_background_toggle = document.querySelector('#solid-background-toggle')
 
     // UI for exporting the animation
     this.dom_export_button_hidden_link = document.querySelector('#download-hidden-link')

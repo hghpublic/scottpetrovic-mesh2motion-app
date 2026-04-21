@@ -183,6 +183,10 @@ body {
     background: linear-gradient(180deg, var(--bg-primary) 41%, var(--bg-tertiary) 100%);
 }
 
+body.solid-background {
+    background: var(--bg-primary);
+}
+
 #tool-selection-group {
     /* helps last element have breathing room when a scroll bar is present */
     margin-bottom: 2rem;
