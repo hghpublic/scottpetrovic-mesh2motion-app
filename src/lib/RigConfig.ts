@@ -109,6 +109,13 @@ export class RigConfig {
           preview_image: 'models-variation/profiles/fox.png'
         } satisfies ModelVariation,
         {
+          model_file: 'models-variation/fox-dog.glb',
+          display_name: 'Dog',
+          attribution: '',
+          license: 'CC0',
+          preview_image: 'models-variation/profiles/dog.png'
+        } satisfies ModelVariation,
+        {
           model_file: 'models-variation/fox-horse.glb',
           display_name: 'Horse',
           attribution: '',
