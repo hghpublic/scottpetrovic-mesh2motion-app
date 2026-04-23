@@ -189,6 +189,22 @@ export class RigConfig {
       has_head_weight_correction: false,
       has_arm_extension: false,
       position_tracking_bone_name: 'hips',
+      model_variations: [
+         {
+          model_file: 'models-variation/kaiju-base.glb',
+          display_name: 'Kaiju',
+          attribution: '',
+          license: 'CC0',
+          preview_image: 'models-variation/profiles/kaiju.png'
+        } satisfies ModelVariation,
+         {
+          model_file: 'models-variation/kaiju-trex.glb',
+          display_name: 'T-Rex',
+          attribution: '',
+          license: 'CC0',
+          preview_image: 'models-variation/profiles/t-rex.png'
+        } satisfies ModelVariation,
+      ]
     } satisfies RigConfigEntry,
     {
       skeleton_type: SkeletonType.Spider,
