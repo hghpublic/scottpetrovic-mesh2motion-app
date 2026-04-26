@@ -11,6 +11,7 @@ export class DownloadSettings extends EventTarget {
   private dom_download_settings_toggle: HTMLButtonElement | null = null
   private dom_download_settings_panel: HTMLElement | null = null
   private dom_bone_naming_group: HTMLElement | null = null
+  private dom_bone_naming_default_radio: HTMLInputElement | null = null
 
   constructor () {
     super()
@@ -25,6 +26,12 @@ export class DownloadSettings extends EventTarget {
   // Download options currently only apply to human skeleton, so this will
   // show/hide the DOM download settings options on UI based on that.
   public update_download_settings_ui_visibility (skeleton_type: SkeletonType): void {
+    // reset to default
+    this.selected_bone_naming_structure = BoneNamingStructure.Default
+    if (this.dom_bone_naming_default_radio !== null) {
+      this.dom_bone_naming_default_radio.checked = true
+    }
+
     const is_human_skeleton = skeleton_type === SkeletonType.Human
 
     if (this.dom_download_settings_popup !== null) {
@@ -42,6 +49,7 @@ export class DownloadSettings extends EventTarget {
     this.dom_download_settings_toggle = document.querySelector('#download-settings-toggle')
     this.dom_download_settings_panel = document.querySelector('#download-settings')
     this.dom_bone_naming_group = document.querySelector('#download-bone-naming-group')
+    this.dom_bone_naming_default_radio = document.querySelector('#bone-naming-default')
   }
 
   private add_event_listeners (): void {
