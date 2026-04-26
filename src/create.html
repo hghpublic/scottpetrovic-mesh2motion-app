@@ -430,7 +430,7 @@
               <hr />
             </div>
 
-            <div style="display: flex; gap: 0.5rem">
+            <div class="download-actions-row">
               <button class="no-style-button" id="action_back_to_edit_skeleton">
                 &#x2039; Back
               </button>
@@ -473,18 +473,71 @@
                 style="display: none"
               />
 
-              <button
-                id="export-button"
-                data-tippy-content="Exporting will combine all animations into a single GLB file."
-              >
-                <span class="button-icon-group">
-                  <span class="material-symbols-outlined">save_alt</span>
-                  <span
-                    >Download
-                    <span id="animation-selection-count">0</span></span
+              <div class="download-combo">
+                <button
+                  id="export-button"
+                  data-tippy-content="Exporting will combine all animations into a single GLB file."
+                >
+                  <span class="button-icon-group">
+                    <span class="material-symbols-outlined">save_alt</span>
+                    <span
+                      >Download
+                      <span id="animation-selection-count">0</span></span
+                    >
+                  </span>
+                </button>
+
+                <div
+                  id="download-settings-popup"
+                  class="download-settings-popup-container"
+                >
+                  <button
+                    id="download-settings-toggle"
+                    class="download-split-toggle"
+                    type="button"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                    aria-controls="download-settings"
+                    data-tippy-content="Download options"
+                    aria-label="Open download options"
                   >
-                </span>
-              </button>
+                    <span class="material-symbols-outlined">arrow_drop_down</span>
+                  </button>
+
+                  <div
+                    id="download-settings"
+                    class="download-settings-panel"
+                    role="dialog"
+                    aria-label="Download settings"
+                    hidden
+                  >
+                      <span class="download-settings-label">Exported Bone Names</span>
+                    <fieldset
+                      id="download-bone-naming-group"
+                      class="toggle"
+                      aria-label="Bone naming structure"
+                    >
+                      <input
+                        type="radio"
+                        id="bone-naming-default"
+                        name="bone-naming-structure"
+                        value="default"
+                        checked
+                      />
+                      <label for="bone-naming-default">Default</label>
+
+                      <input
+                        type="radio"
+                        id="bone-naming-mixamo"
+                        name="bone-naming-structure"
+                        value="mixamo"
+                      />
+                      <label for="bone-naming-mixamo">Mixamo</label>
+                    </fieldset>
+                  </div>
+                </div>
+              </div>
+
               <a id="download-hidden-link" href="#" style="display: none"></a>
             </div>
           </div>

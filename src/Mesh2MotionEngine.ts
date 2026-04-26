@@ -16,6 +16,7 @@ import { StepLoadSkeleton } from './lib/processes/load-skeleton/StepLoadSkeleton
 import { StepEditSkeleton } from './lib/processes/edit-skeleton/StepEditSkeleton.ts'
 import { MeshDragBonePlacement } from './lib/processes/edit-skeleton/MeshDragBonePlacement.ts'
 import { StepAnimationsListing } from './lib/processes/animations-listing/StepAnimationsListing.ts'
+import { DownloadSettings } from './lib/processes/export-to-file/DownloadSettings.ts'
 import { StepExportToFile } from './lib/processes/export-to-file/StepExportToFile.ts'
 import { StepWeightSkin } from './lib/processes/weight-skin/StepWeightSkin.ts'
 
@@ -60,6 +61,7 @@ export class Mesh2MotionEngine {
   public edit_skeleton_step: StepEditSkeleton
   public weight_skin_step: StepWeightSkin
   public animations_listing_step: StepAnimationsListing
+  public download_settings: DownloadSettings
   public file_export_step: StepExportToFile
 
   // for looking at specific bones
@@ -95,6 +97,7 @@ export class Mesh2MotionEngine {
     this.edit_skeleton_step = new StepEditSkeleton()
     this.weight_skin_step = new StepWeightSkin()
     this.animations_listing_step = new StepAnimationsListing(this.theme_manager)
+    this.download_settings = new DownloadSettings()
     this.file_export_step = new StepExportToFile()
     this.mesh_drag_bone_placement = new MeshDragBonePlacement(
       this.camera,
