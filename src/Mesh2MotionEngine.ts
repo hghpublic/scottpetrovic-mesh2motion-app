@@ -421,7 +421,13 @@ export class Mesh2MotionEngine {
     }
     else if (this.process_step === ProcessStep.AnimationsListing) {
       this.process_step = ProcessStep.AnimationsListing
-      this.animations_listing_step.begin(this.load_skeleton_step.skeleton_type(), this.load_skeleton_step.skeleton_scale())
+
+      const active_skeleton_type: SkeletonType = this.load_skeleton_step.skeleton_type()
+      this.animations_listing_step.begin(active_skeleton_type, this.load_skeleton_step.skeleton_scale())
+
+      // download options for export currently will only work for humanoid skeletons
+      // since we will give options to change the bone names to other standard formats.
+      this.download_settings.update_download_settings_ui_visibility(active_skeleton_type)
 
       // update reference of skeleton helper to use the final skinned mesh
       this.regenerate_skeleton_helper(this.weight_skin_step.skeleton())

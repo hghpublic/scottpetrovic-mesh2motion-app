@@ -1,3 +1,5 @@
+import { SkeletonType } from '../../enums/SkeletonType.ts'
+
 export enum BoneNamingStructure {
   Default = 'default',
   Mixamo = 'mixamo'
@@ -18,6 +20,21 @@ export class DownloadSettings extends EventTarget {
 
   public bone_naming_structure (): BoneNamingStructure {
     return this.selected_bone_naming_structure
+  }
+
+  // Download options currently only apply to human skeleton, so this will
+  // show/hide the DOM download settings options on UI based on that.
+  public update_download_settings_ui_visibility (skeleton_type: SkeletonType): void {
+    const is_human_skeleton = skeleton_type === SkeletonType.Human
+
+    if (this.dom_download_settings_popup !== null) {
+      this.dom_download_settings_popup.style.display = is_human_skeleton ? 'inline-flex' : 'none'
+      this.dom_download_settings_popup.setAttribute('aria-hidden', is_human_skeleton ? 'false' : 'true')
+    }
+
+    if (!is_human_skeleton) {
+      this.set_popup_visibility(false)
+    }
   }
 
   private initialize_dom_elements (): void {
