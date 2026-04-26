@@ -116,6 +116,13 @@ export class MixamoMapper {
   }
 
   /**
+   * Get the expected Mixamo bone name for a Mesh2Motion bone name.
+   */
+  static map_source_bone_name_to_mixamo (source_bone_name: string): string | undefined {
+    return this.BONE_MAP[source_bone_name]
+  }
+
+  /**
    * Map Mesh2Motion bones to Mixamo bones
    * @param source_bones - Mesh2Motion skeleton bones
    * @param target_bones - Mixamo skeleton bones

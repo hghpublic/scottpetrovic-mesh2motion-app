@@ -1,8 +1,10 @@
 import { UI } from '../../UI.ts'
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js'
 import { type AnimationClip, Scene, type SkinnedMesh, type Object3D } from 'three'
+import { type DownloadSettings } from './DownloadSettings.ts'
+import { ExportBoneNamingService } from './ExportBoneNamingService.ts'
 
-// Note: EventTarget is a built-ininterface and do not need to import it
+// Note: EventTarget is a built-in interface and do not need to import it
 export class StepExportToFile extends EventTarget {
   private readonly ui: UI = UI.getInstance()
   private animation_clips_to_export: AnimationClip[] = []
@@ -16,7 +18,11 @@ export class StepExportToFile extends EventTarget {
     })
   }
 
-  public export (skinned_meshes: SkinnedMesh[], filename = 'exported_model'): void {
+  public export (
+    skinned_meshes: SkinnedMesh[], 
+    filename: string = 'exported_model',
+    download_settings: DownloadSettings): void {
+
     if (this.animation_clips_to_export.length === 0) {
       console.log('ERROR: No animation clips added to export')
       return
@@ -35,10 +41,17 @@ export class StepExportToFile extends EventTarget {
       export_scene.add(final_skinned_mesh)
     })
 
-    console.log('SKINNED MESH DATA TO EXPORT:', skinned_meshes)
-    console.log('animations to export', this.animation_clips_to_export)
+    const export_clips = this.animation_clips_to_export.map((clip) => clip.clone())
+    const restore_bone_names = ExportBoneNamingService.apply_download_settings(
+      skinned_meshes,
+      export_clips,
+      download_settings.bone_naming_structure()
+    )
 
-    this.export_glb(export_scene, this.animation_clips_to_export, filename)
+    console.log('SKINNED MESH DATA TO EXPORT:', skinned_meshes)
+    console.log('animations to export', export_clips)
+
+    this.export_glb(export_scene, export_clips, filename)
       .then(() => {
         // Move the skinned meshes back to their original parents
         skinned_meshes.forEach((final_skinned_mesh) => {
@@ -51,8 +64,14 @@ export class StepExportToFile extends EventTarget {
             console.log('ERROR: No original parent found for skinned mesh when exporting and re-parenting to original scene')
           }
         })
+
+        restore_bone_names()
       })
-      .catch((error) => { console.log('Error exporting GLB:', error) })
+      .catch((error) => {
+        console.log('Error exporting GLB:', error)
+
+        restore_bone_names()
+      })
   }
 
   public async export_glb (exported_scene: Scene, animations_to_export: AnimationClip[], file_name: string): Promise<void> {
