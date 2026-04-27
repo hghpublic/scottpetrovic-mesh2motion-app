@@ -3,25 +3,38 @@
 // and ideas from
 // https://discourse.threejs.org/t/extend-skeletonhelper-to-accommodate-fat-lines-perhaps-with-linesegments2/59436/2
 
-import { Color, Matrix4, Vector3, Points, PointsMaterial, BufferGeometry, Float32BufferAttribute, TextureLoader, LineSegments, LineBasicMaterial, type Bone } from 'three'
+import { Color, Matrix4, Vector3, Points, PointsMaterial, BufferGeometry, Float32BufferAttribute, TextureLoader, LineSegments, LineBasicMaterial, type Bone, type ColorRepresentation } from 'three'
+import { BoneCategory, BoneClassifier } from './solvers/BoneClassifier'
 
 const _vector = /*@__PURE__*/ new Vector3()
 const _boneMatrix = /*@__PURE__*/ new Matrix4()
 const _matrixWorldInv = /*@__PURE__*/ new Matrix4()
+
+interface CustomSkeletonHelperOptions {
+  color?: ColorRepresentation
+  jointColor?: ColorRepresentation
+}
+
+const bone_category_colors: Record<BoneCategory, number> = {
+  [BoneCategory.Torso]: 0xff9f1c,
+  [BoneCategory.Limb]: 0x3a86ff,
+  [BoneCategory.Extremity]: 0x8338ec,
+  [BoneCategory.Other]: 0xadb5bd
+}
 
 class CustomSkeletonHelper extends LineSegments {
   private readonly joint_points: Points
   private readonly jointTexture = new TextureLoader().load('/images/skeleton-joint-point.png')
   private hide_right_side_joints: boolean = false
 
-  constructor (object: any, options = {}) {
+  constructor (object: any, options: CustomSkeletonHelperOptions = {}) {
     const bones = getBoneList(object)
     const geometry = new BufferGeometry()
 
     const vertices = []
     const colors = []
     const color = new Color(options.color || 0x0000ff) // Default color blue
-    const joint_color = new Color(options.jointColor || 0x0000ff) // Default joint color blue
+    const joint_color = new Color(options.jointColor ?? 0x0000ff) // Default joint color blue
 
     for (let i = 0; i < bones.length; i++) {
       const bone = bones[i]
@@ -58,17 +71,32 @@ class CustomSkeletonHelper extends LineSegments {
     // Add points for joints
     const pointsGeometry = new BufferGeometry()
     const pointsMaterial = new PointsMaterial({
-      size: 25, // Size of the joint circles on skeleton
-      color: joint_color,
+      size: 30, // Size of the joint circles on skeleton
+      color: options.jointColor !== undefined ? joint_color : 0xffffff,
       depthTest: false,
       sizeAttenuation: false, // Disable size attenuation to keep size constant in screen space
       map: this.jointTexture,
       transparent: true, // Enable transparency for the circular texture
-      opacity: 0.3
+      opacity: 0.8,
+      vertexColors: options.jointColor === undefined
     })
 
     const pointPositions = new Float32BufferAttribute(bones.length * 3, 3)
     pointsGeometry.setAttribute('position', pointPositions)
+
+    // use bone category to color joints to help with seeing a bunch of them
+    if (options.jointColor === undefined) {
+      const bone_classifier = new BoneClassifier(bones as Bone[])
+      const point_colors: number[] = []
+
+      bones.forEach((bone, idx) => {
+        const bone_category = bone_classifier.get_category(idx)
+        const category_color = new Color(bone_category_colors[bone_category])
+        point_colors.push(category_color.r, category_color.g, category_color.b)
+      })
+
+      pointsGeometry.setAttribute('color', new Float32BufferAttribute(point_colors, 3))
+    }
 
     this.joint_points = new Points(pointsGeometry, pointsMaterial)
     this.add(this.joint_points)
