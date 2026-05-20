@@ -8,10 +8,7 @@ export interface RigConfigEntry {
   rig_display_name: string // Display name shown in both the model and skeleton dropdowns
   animation_files: string[] // Animation filenames (no base path) loaded for this rig type
   animation_preview_folder: string // Sub-folder name used when referencing animation preview thumbnails
-  has_hand_options: boolean // Only Human has per-finger hand skeleton options
-  has_head_weight_correction: boolean // Only Human shows the head weight correction panel
-  has_arm_extension: boolean // Only Human shows the arm expand/contract slider
-  // The bone used for position tracking (e.g., 'hips' or 'head'). 
+  // The bone used for position tracking (e.g., 'hips' or 'head').
   // we only have one bone per rig that we allow position keyframes (besides root)
   position_tracking_bone_name: string 
   model_variations?: ModelVariation[] // similar models (human, zombie, etc)
@@ -41,9 +38,6 @@ export class RigConfig {
       rig_display_name: 'Human',
       animation_files: ['../animations/human-base-animations.glb', '../animations/human-addon-animations.glb'],
       animation_preview_folder: 'human',
-      has_hand_options: true,
-      has_head_weight_correction: true,
-      has_arm_extension: true,
       position_tracking_bone_name: 'pelvis',
       model_variations: humanVariations
     } satisfies RigConfigEntry,
@@ -54,9 +48,6 @@ export class RigConfig {
       rig_display_name: 'Fox',
       animation_files: ['../animations/fox-animations.glb'],
       animation_preview_folder: 'fox',
-      has_hand_options: false,
-      has_head_weight_correction: false,
-      has_arm_extension: false,
       position_tracking_bone_name: 'hips',
       model_variations: foxVariations
     } satisfies RigConfigEntry,
@@ -67,9 +58,6 @@ export class RigConfig {
       rig_display_name: 'Bird',
       animation_files: ['../animations/bird-animations.glb'],
       animation_preview_folder: 'bird',
-      has_hand_options: false,
-      has_head_weight_correction: false,
-      has_arm_extension: false,
       position_tracking_bone_name: 'hips',
       model_variations: birdVariations
     } satisfies RigConfigEntry,
@@ -80,9 +68,6 @@ export class RigConfig {
       rig_display_name: 'Dragon',
       animation_files: ['../animations/dragon-animations.glb'],
       animation_preview_folder: 'dragon',
-      has_hand_options: false,
-      has_head_weight_correction: false,
-      has_arm_extension: false,
       position_tracking_bone_name: 'hips',
     } satisfies RigConfigEntry,
     {
@@ -92,9 +77,6 @@ export class RigConfig {
       rig_display_name: 'Kaiju',
       animation_files: ['../animations/kaiju-animations.glb'],
       animation_preview_folder: 'kaiju',
-      has_hand_options: false,
-      has_head_weight_correction: false,
-      has_arm_extension: false,
       position_tracking_bone_name: 'hips',
       model_variations: kaijuVariations
     } satisfies RigConfigEntry,
@@ -105,9 +87,6 @@ export class RigConfig {
       rig_display_name: 'Spider',
       animation_files: ['../animations/spider-animations.glb'],
       animation_preview_folder: 'spider',
-      has_hand_options: false,
-      has_head_weight_correction: false,
-      has_arm_extension: false,
       position_tracking_bone_name: 'hips',
     } satisfies RigConfigEntry,
     {
@@ -117,9 +96,6 @@ export class RigConfig {
       rig_display_name: 'Snake',
       animation_files: ['../animations/snake-animations.glb'],
       animation_preview_folder: 'snake',
-      has_hand_options: false,
-      has_head_weight_correction: false,
-      has_arm_extension: false,
       position_tracking_bone_name: 'head', // snake doesn't have hips, so we track position from the head instead
     } satisfies RigConfigEntry,
     {
@@ -129,9 +105,6 @@ export class RigConfig {
       rig_display_name: 'Fish',
       animation_files: ['../animations/shark-animations.glb'],
       animation_preview_folder: 'shark',
-      has_hand_options: false,
-      has_head_weight_correction: false,
-      has_arm_extension: false,
       position_tracking_bone_name: 'pelvis',
       model_variations: fishVariations
     } satisfies RigConfigEntry

@@ -290,8 +290,7 @@ export class StepLoadSkeleton extends EventTarget {
       return
     }
 
-    const config = RigConfig.by_skeleton_type(this.skeleton_file_path())
-    if (config?.has_hand_options === true) {
+    if (this.skeleton_file_path() === SkeletonType.Human) {
       this.ui.dom_hand_skeleton_options.style.display = 'flex'
     } else {
       this.ui.dom_hand_skeleton_options.style.display = 'none'

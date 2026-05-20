@@ -104,8 +104,7 @@ export class StepEditSkeleton extends EventTarget {
     // keep track of skeleton type to show/hide certain UI elements
     // only human skeletons have the head weight correction option
     if (this.ui.dom_use_head_weight_correction_container != null) {
-      const config = RigConfig.by_skeleton_type(skeleton_type)
-      if (config?.has_head_weight_correction === true) {
+      if (skeleton_type === SkeletonType.Human) {
         this.ui.dom_use_head_weight_correction_container.style.display = 'block'
       } else {
         this.ui.dom_use_head_weight_correction_container.style.display = 'none'
