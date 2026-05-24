@@ -2,6 +2,12 @@
   margin: 3rem 0;
 }
 
+@keyframes dialog-bounce-in {
+  0%   { transform: scale(0.4); opacity: 0; }
+  70%  { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1.0); }
+}
+
 .modal-dialog-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -21,13 +27,7 @@
   text-align: center;
   max-width: 80%;
   box-shadow: 0 0 5rem #0b1d36;
-  animation: modal-dialog-bounce-in 0.3s ease-out;
-}
-
-@keyframes modal-dialog-bounce-in {
-  0%   { transform: scale(0.4); opacity: 0; }
-  70%  { transform: scale(1.1); opacity: 1; }
-  100% { transform: scale(1.0); }
+  animation: dialog-bounce-in 0.3s ease-out;
 }
 
 .modal-dialog-body {
@@ -90,14 +90,8 @@
 
 .variation-dialog {
   width: 60vw;
-  animation: variation-dialog-bounce-in 0.3s ease-out;
+  animation: dialog-bounce-in 0.3s ease-out;
   box-shadow: 0 0 7rem #08161e9e;
-}
-
-@keyframes variation-dialog-bounce-in {
-  0%   { transform: scale(0.4); opacity: 0; }
-  70%  { transform: scale(1.1); opacity: 1; }
-  100% { transform: scale(1.0); }
 }
 
 .variation-grid {
@@ -220,64 +214,80 @@
 }
 
 .download-success-dialog-content {
-  background: var(--bg-primary);
-  border-radius: 8px;
-  padding: 2rem;
-  max-width: 600px;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 0 5rem rgba(0, 0, 0, 0.5);
-  animation: download-success-bounce-in 0.3s ease-out;
-  color: var(--text-primary);
-}
-
-@keyframes download-success-bounce-in {
-  0% {
-    transform: scale(0.4);
-    opacity: 0;
-  }
-  70% {
-    transform: scale(1.1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-  }
+    background: var(--bg-primary);
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 60rem;
+    overflow-y: auto;
+    box-shadow: 0 0 5rem rgba(0, 0, 0, 0.5);
+    animation: dialog-bounce-in 0.3s ease-out;
+    color: var(--text-primary);
 }
 
 .download-success-dialog-content h2 {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.8rem;
+  margin: 0;
+  font-size: 2.2rem;
   color: var(--text-primary);
+  justify-content: space-around;
+  display: flex;
+  margin-bottom: 1.0rem;
 }
 
 .download-success-dialog-body {
-  color: var(--text-primary);
+color: var(--text-primary);
   font-size: 1rem;
   line-height: 1.5;
+  display: flex;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
 }
 
-.download-success-dialog-body p {
-  margin: 0.5rem 0;
+.download-success-dialog-body > p {
+  grid-column: 1 / -1;
+  margin: 0 0 1rem 0;
+  text-align: center;
+}
+
+.download-success-section {
+  padding: 2rem;
+  background: var(--bg-alternate);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.download-success-section h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+.download-success-section p {
+  margin: 1rem 0;
+  color: var(--text-alternate);
+  font-size: 1.1rem;
+  line-height: 1.4;
 }
 
 .download-success-dialog-close {
-  margin-top: 1.5rem;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  cursor: pointer;
-  border: none;
-  border-radius: 4px;
-  background: var(--button-primary-bg);
-  color: var(--button-primary-text);
-  transition: opacity 0.2s;
+    display: flex;
+    padding: 1rem;
+    font-size: 1.1rem;
+    justify-content: center;
 }
 
-.download-success-dialog-close:hover {
-  opacity: 0.8;
-}
+@media (max-width: 768px) {
+  .download-success-dialog-body {
+    grid-template-columns: 1fr;
+  }
 
-.download-success-dialog-close:active {
-  opacity: 0.9;
+  .download-success-section {
+    padding: 1rem;
+  }
+
+  .download-success-dialog-content {
+    max-width: 90%;
+  }
 }
 

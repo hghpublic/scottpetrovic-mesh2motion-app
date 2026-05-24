@@ -236,8 +236,13 @@ button.secondary-button {
     cursor: pointer;
     transition: transform 0.2s ease;
     transform: scale(1.00);
+    display: inline-block;
+    padding: 0.5em 1.5em;
+    text-decoration: none;
+    color: var(--text-primary);
 }
-button.secondary-button:hover {
+button.secondary-button:hover,
+a.secondary-button:hover {
     transform: scale(1.05);
     background: var(--bg-alternate);
 }
@@ -281,6 +286,9 @@ button, .button {
     cursor: pointer;
     text-align: center; /* useful for custom file upload label */
     transition: all 0.1s ease;
+    text-decoration: none;
+    font-size: 1.0rem;
+    color: var(--text-primary);
 }
 button:hover, .button:hover {
     /* background: var(--button-primary-bg);  */
