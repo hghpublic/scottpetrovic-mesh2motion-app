@@ -200,6 +200,17 @@
 
 /* ── Download Success Dialog ── */
 
+.survey-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.survey-thank-you {
+  font-style: italic;
+  text-align: center;
+}
+
 .download-success-dialog-overlay {
   position: fixed;
   top: 0;
@@ -329,6 +340,7 @@ font-size: 2rem;
     max-height: 50px;
     resize: none;
     margin-bottom: 1rem;
+    color: var(--text-primary);
 }
 
 .download-success-feedback-textarea::placeholder {

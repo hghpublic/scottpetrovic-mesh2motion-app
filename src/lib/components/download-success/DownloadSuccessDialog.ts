@@ -3,7 +3,6 @@ import { StarRating } from './StarRating'
 export class DownloadSuccessDialog {
   private dialog_element: HTMLDivElement | null = null
   private star_rating: StarRating | null = null
-  private current_rating: number | null = null
   private readonly content_html = `
 
 
@@ -19,9 +18,11 @@ export class DownloadSuccessDialog {
 
         <div class="download-success-section">
           <h3>Share Your Feedback</h3>
-          <div class="star-rating-container"></div>
-          <textarea class="download-success-feedback-textarea" placeholder="Add optionalal feedback. (500 character max)" rows="4" maxlength="500"></textarea>
-          <button id="survey-submission-button">Submit</button>
+          <div class="survey-content">
+            <div class="star-rating-container"></div>
+            <textarea id="download-success-feedback" name="download-success-feedback" class="download-success-feedback-textarea" placeholder="Add optionalal feedback. (500 character max)" rows="4" maxlength="500"></textarea>
+            <button id="survey-submission-button">Submit</button>
+          </div>
         </div>
 
         <div class="download-success-section">
@@ -51,10 +52,8 @@ export class DownloadSuccessDialog {
     // Initialize star rating
     const rating_container = this.dialog_element.querySelector('.star-rating-container')
     if (rating_container) {
-      this.star_rating = new StarRating((rating) => {
-        this.current_rating = rating
-        console.log('User rated:', rating)
-      })
+      this.star_rating = new StarRating()
+
       rating_container.innerHTML = this.star_rating.getHTML()
       this.star_rating.attachEventListeners(rating_container as HTMLElement)
     }
@@ -64,16 +63,15 @@ export class DownloadSuccessDialog {
     submit_button?.addEventListener('click', async () => {
       const feedback_textarea = this.dialog_element?.querySelector('.download-success-feedback-textarea') as HTMLTextAreaElement
       const feedback_text = feedback_textarea?.value?.trim() || ''
+      const current_rating = this.star_rating?.getRating() ?? 3
+      const survey_content = this.dialog_element?.querySelector('.survey-content') as HTMLDivElement | null
+
+      submit_button.setAttribute('disabled', 'true')
 
       // Worker requires each submitted item to include a non-empty answer.
-      if (this.current_rating === null) {
-        console.error('Survey submission blocked: rating is required before submitting')
-        return
-      }
-
       // Build payload with required rating and optional feedback.
       const survey_data: Array<{ question: string, answer: string | number }> = [
-        { question: 'Rating', answer: this.current_rating }
+        { question: 'Rating', answer: current_rating }
       ]
 
       if (feedback_text.length > 0) {
@@ -91,11 +89,19 @@ export class DownloadSuccessDialog {
         })
         if (!res.ok) {
           console.error('Survey submission failed:', res.statusText)
+          submit_button.removeAttribute('disabled')
         } else {
           console.log('Survey submitted successfully')
+          if (survey_content) {
+            survey_content.innerHTML = `
+            <p class="survey-thank-you">
+              Thanks for the feedback. These results will help determine what bugs need fixing, or what features to improve in the future.
+            </p>`
+          }
         }
       } catch (error) {
         console.error('Error submitting survey:', error)
+        submit_button.removeAttribute('disabled')
       }
     })
 
