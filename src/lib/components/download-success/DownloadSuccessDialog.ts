@@ -7,17 +7,17 @@ export class DownloadSuccessDialog {
 
 
     <div class="download-success-dialog-content">
-      <h2>Export Successful</h2>
+      <h2>Enjoy the free animations</h2>
       <div class="download-success-dialog-body">
         <div class="download-success-section">
           <h3>Support the Project</h3>
-          <p>If you find Mesh2Motion helpful, consider donating to help us keep improving the tool
+          <p>If you find this application helpful, consider contributing to keep improving the tool
             and adding new features.</p>
           <a href="https://support.mesh2motion.org/" class="button">Learn More</a>
         </div>
 
         <div class="download-success-section">
-          <h3>Share Your Feedback</h3>
+          <h3>How was your experience?</h3>
           <div class="survey-content">
             <div class="star-rating-container"></div>
             <textarea id="download-success-feedback" name="download-success-feedback" class="download-success-feedback-textarea" placeholder="Add optionalal feedback. (500 character max)" rows="4" maxlength="500"></textarea>
@@ -27,7 +27,7 @@ export class DownloadSuccessDialog {
 
         <div class="download-success-section">
           <h3>Join Our Community</h3>
-          <p>Have questions or want to share your creations? Join us on Discord to connect with
+          <p>Have questions or want to see what is going on? Join us on Discord to connect with
             other animators and get support.</p>
           <a href="https://discord.gg/UChE936q7y" target="_blank" class="button">
             Join Discord Server
@@ -35,7 +35,7 @@ export class DownloadSuccessDialog {
         </div>
 
       </div>
-      <a href="#" class="download-success-dialog-close">Not today, maybe tomorrow</a>
+      <button class="download-success-dialog-close secondary-button">Close</button>
     </div> 
   `
 

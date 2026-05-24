@@ -1,6 +1,7 @@
 export class StarRating {
   private rating: number = 3
   private onRatingChange?: (rating: number) => void
+  private readonly rating_emojis: string[] = ['🤮', '🙁', '😐', '🙂', '😍']
 
   constructor (onRatingChange?: (rating: number) => void) {
     this.onRatingChange = onRatingChange
@@ -10,8 +11,8 @@ export class StarRating {
     return `
       <div class="star-rating">
         ${[1, 2, 3, 4, 5].map(star => `
-          <button class="star-button" data-star="${star}" aria-label="Rate ${star} stars">
-            <span class="star-icon">★</span>
+          <button class="star-button" data-star="${star}" aria-label="Rate ${star}: ${this.rating_emojis[star - 1]}">
+            <span class="star-icon" aria-hidden="true">${this.rating_emojis[star - 1]}</span>
           </button>
         `).join('')}
       </div>

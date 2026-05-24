@@ -208,7 +208,7 @@
 
 .survey-thank-you {
   font-style: italic;
-  text-align: center;
+  margin-top: 0 !important;
 }
 
 .download-success-dialog-overlay {
@@ -274,6 +274,7 @@
   margin: 0;
   font-size: 1.5rem;
   color: var(--text-primary);
+  white-space: pre; /* no word-wrap */
 }
 
 .download-success-section p {
@@ -284,10 +285,10 @@
 }
 
 .download-success-dialog-close {
-    display: flex;
+    display: flex !important;
     padding: 1rem;
-    font-size: 1.1rem;
     justify-content: center;
+    margin: 1rem auto;
 }
 
 /* ── Star Rating Component ── */
@@ -311,9 +312,7 @@
 }
 
 .star-icon {
-font-size: 2rem;
-    color: #fff566;
-    -webkit-text-stroke: 1px #978530;
+  font-size: 1.9rem;
 }
 
 .star-button:hover {
@@ -321,10 +320,13 @@ font-size: 2rem;
   transform: scale(1.2);
 }
 
-.star-button.active,
-.star-button:active {
+.star-button.active {
   color: var(--button-primary-bg);
   opacity: 1;
+}
+
+.star-button:active {
+  transform: scale(0.92);
 }
 
 /* ── Download Success Feedback Textarea ── */
@@ -345,7 +347,7 @@ font-size: 2rem;
 
 .download-success-feedback-textarea::placeholder {
   color: var(--text-primary);
-  opacity: 1;
+  opacity: 0.6;
   font-style: italic;
 }
 
