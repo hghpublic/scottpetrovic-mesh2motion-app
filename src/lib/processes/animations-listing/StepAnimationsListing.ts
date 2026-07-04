@@ -487,6 +487,13 @@ export class StepAnimationsListing extends EventTarget {
       })
     })
 
+    // event listener for select all / deselect all button
+    const toggle_select_all_button = document.querySelector('#toggle-select-all-animations')
+    toggle_select_all_button?.addEventListener('click', () => {
+      this.animation_search?.toggle_select_all_animations()
+      this.update_download_button_enabled()
+    })
+
     // helps ensure we don't add event listeners multiple times
     this.has_added_event_listeners = true
   }

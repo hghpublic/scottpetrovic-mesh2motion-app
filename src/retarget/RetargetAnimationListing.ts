@@ -147,7 +147,7 @@ export class RetargetAnimationListing extends EventTarget {
     // Update animation listing count display
     const listing_count_element = document.getElementById('animation-listing-count')
     if (listing_count_element !== null) {
-      listing_count_element.textContent = this.animation_clips_loaded.length.toString() + 'animations'
+      listing_count_element.textContent = this.animation_clips_loaded.length.toString() + ' animations'
     }
 
     // the export button enabled state relies on the animation search being initialized
@@ -243,6 +243,24 @@ export class RetargetAnimationListing extends EventTarget {
         const show_selected_only = target.value === 'selected'
         this.animation_search?.set_show_selected_only(show_selected_only)
       })
+    })
+
+    // event listener for select all / deselect all button
+    const toggle_select_all_button = document.querySelector('#toggle-select-all-animations')
+    toggle_select_all_button?.addEventListener('click', () => {
+      this.animation_search?.toggle_select_all_animations()
+      // Update the export button disabled state
+      const animation_checkboxes = document.querySelectorAll('#animations-items input[type="checkbox"]')
+      const is_any_checkbox_checked: boolean = Array.from(animation_checkboxes).some((checkbox) => {
+        return (checkbox as HTMLInputElement).checked
+      })
+      if (this.export_button != null) {
+        this.export_button.disabled = !is_any_checkbox_checked
+      }
+      // Update the count
+      if (this.animation_count_element != null) {
+        this.animation_count_element.textContent = this.get_selected_animation_indices().length.toString()
+      }
     })
   }
 

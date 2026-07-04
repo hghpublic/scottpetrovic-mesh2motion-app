@@ -283,4 +283,42 @@ export class AnimationSearch extends EventTarget {
       this.render_filtered_animations('')
     }
   }
+
+  public toggle_select_all_animations (): void {
+    // Check if all animations are currently selected
+    const all_selected = this.all_animations.every(animation => animation.isChecked === true)
+
+    // Toggle the state: if all are selected, deselect all; otherwise, select all
+    const new_state = !all_selected
+    this.all_animations.forEach(animation => {
+      animation.isChecked = new_state
+    })
+
+    // Update all checkboxes in the UI
+    this.update_all_checkboxes_in_ui(new_state)
+
+    // Save the checkbox states to ensure they're synced with the UI
+    this.save_current_checkbox_states()
+
+    // If in "selected only" mode, re-render to update the displayed animations
+    if (this.show_selected_only) {
+      const filter_text = this.filter_input?.value.toLowerCase() ?? ''
+      this.render_filtered_animations(filter_text)
+    }
+
+    // Emit event to notify that export options have changed
+    this.custom_event = new CustomEvent('export-options-changed', { detail: { selectedAnimations: this.get_selected_animation_indices() } })
+    this.dispatchEvent(this.custom_event)
+  }
+
+  private update_all_checkboxes_in_ui (checked_state: boolean): void {
+    if (this.animation_list_container === null) {
+      return
+    }
+
+    const checkboxes = this.animation_list_container.querySelectorAll('input[type="checkbox"]')
+    checkboxes.forEach((checkbox) => {
+      (checkbox as HTMLInputElement).checked = checked_state
+    })
+  }
 }

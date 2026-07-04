@@ -151,9 +151,6 @@ div, p {
 }
 
 #animation-listing-count {
-    position: absolute;
-    top: 0.3rem;
-    right: 1rem;
     color: var(--text-alternate)
 }
 
@@ -483,11 +480,17 @@ option {
     background: var(--bg-primary);
   }
 
-
+#toggle-select-all-container {
+    display: flex; 
+    gap: 1rem; 
+    align-items: center; 
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
 
 
 #animations-items{
-    max-height: calc(100vh - 27rem);
+    max-height: calc(100vh - 22rem);
     display: inline-flex;
     overflow: auto;;
     flex-direction: row;
@@ -498,6 +501,11 @@ option {
     flex-wrap: wrap;
     overflow-x: hidden;
     width: 24rem; /* creates 3 column of animation items */
+}
+
+#animations-items.create-page {
+    /* create page has a tile at the top so we need this listing grid slightly smaller */
+     max-height: calc(100vh - 30rem);
 }
 
 #animations-items div {

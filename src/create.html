@@ -320,8 +320,13 @@
                 <!-- Filter textbox for animations -->
                 <span style="position: relative; flex: 1;">
                     <input type="text" id="animation-filter" placeholder="Filter">
-                    <div id="animation-listing-count">0</div>
                 </span>
+            </div>
+
+            <!-- Select all / Deselect all button and animation count -->
+            <div id="toggle-select-all-container">
+                <button id="toggle-select-all-animations" class="secondary-button">Select All</button>
+                <div id="animation-listing-count" style="white-space: nowrap;">0 animations</div>
             </div>
 
 
@@ -334,7 +339,7 @@
 
             <!-- javascript will populate this item with animations
                          that we get from the animations file(s)  -->
-            <div id="animations-items"></div>
+            <div id="animations-items" class="create-page"></div>
 
             <!-- slider to control arm extension (hide this feature until the base functionality is more stable) -->
             <div id="arm-extension-options">
