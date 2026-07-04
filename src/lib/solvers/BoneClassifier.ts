@@ -4,7 +4,7 @@ import { type Bone } from 'three'
  * Classifies bones into categories that determine smoothing behavior.
  * - torso: spine, chest, neck — gets wider multi-ring smoothing
  * - limb: arms, legs — gets directional child-only smoothing
- * - extremity: hands, feet, fingers, toes — minimal smoothing
+ * - extremity: hands, feet, fingers, toes — no smoothing (stay rigid)
  * - other: root, head, unclassified — default smoothing
  */
 export enum BoneCategory {
@@ -34,6 +34,18 @@ export class BoneClassifier {
     const cat_a = this.get_category(bone_index_a)
     const cat_b = this.get_category(bone_index_b)
     return cat_a === BoneCategory.Limb || cat_b === BoneCategory.Limb
+  }
+
+  /**
+   * Returns true if the boundary is between two extremity bones
+   * (hand↔finger, finger↔finger, foot↔toe). These get no smoothing so
+   * small parts like fingers stay rigid instead of turning mushy.
+   * Requires both sides to be extremities, so the wrist/ankle
+   * (limb↔extremity) is not caught here and keeps its limb smoothing.
+   */
+  public is_extremity_boundary (bone_index_a: number, bone_index_b: number): boolean {
+    return this.get_category(bone_index_a) === BoneCategory.Extremity &&
+           this.get_category(bone_index_b) === BoneCategory.Extremity
   }
 
   /**
